@@ -1,0 +1,4 @@
+[02-May-2019 14:13:08 America/Chicago] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, string given in /home/omiguel/public_html/contrato/alta_lecturafile.php on line 150
+[02-May-2019 14:13:11 America/Chicago] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, string given in /home/omiguel/public_html/contrato/alta_lecturafile.php on line 150
+[02-May-2019 14:13:12 America/Chicago] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, string given in /home/omiguel/public_html/contrato/alta_lecturafile.php on line 150
+[02-May-2019 14:13:13 America/Chicago] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, string given in /home/omiguel/public_html/contrato/alta_lecturafile.php on line 150
