@@ -1,0 +1,61 @@
+[07-Mar-2019 17:54:37 UTC] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, string given in /home/fernando/public_html/mesa/alta_ticketphp.php on line 1719
+[07-Mar-2019 12:28:06 America/Chicago] PHP Warning:  mysql_num_rows() expects parameter 1 to be resource, string given in /home/fernando/public_html/mesa/alta_ticket2.php on line 1116
+[07-Mar-2019 12:28:06 America/Chicago] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, string given in /home/fernando/public_html/mesa/alta_ticket2.php on line 1119
+[07-Mar-2019 12:56:56 America/Chicago] PHP Warning:  mysql_num_rows() expects parameter 1 to be resource, string given in /home/fernando/public_html/mesa/alta_ticket2.php on line 1116
+[07-Mar-2019 12:56:56 America/Chicago] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, string given in /home/fernando/public_html/mesa/alta_ticket2.php on line 1119
+[14-Mar-2019 11:41:41 America/Chicago] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, string given in /home/omiguel/public_html/mesa/alta_ticketphp.php on line 1719
+[26-Mar-2019 13:50:05 America/Chicago] PHP Warning:  mysql_num_rows() expects parameter 1 to be resource, string given in /home/omiguel/public_html/mesa/alta_ticket2.php on line 1116
+[26-Mar-2019 13:50:05 America/Chicago] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, string given in /home/omiguel/public_html/mesa/alta_ticket2.php on line 1119
+[26-Mar-2019 13:50:27 America/Chicago] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, string given in /home/omiguel/public_html/mesa/alta_misticketphp.php on line 399
+[26-Mar-2019 13:51:07 America/Chicago] PHP Warning:  mysql_num_rows() expects parameter 1 to be resource, string given in /home/omiguel/public_html/mesa/alta_ticket2.php on line 1116
+[26-Mar-2019 13:51:07 America/Chicago] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, string given in /home/omiguel/public_html/mesa/alta_ticket2.php on line 1119
+[26-Mar-2019 13:51:32 America/Chicago] PHP Warning:  mysql_num_rows() expects parameter 1 to be resource, string given in /home/omiguel/public_html/mesa/alta_ticket2.php on line 1116
+[26-Mar-2019 13:51:32 America/Chicago] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, string given in /home/omiguel/public_html/mesa/alta_ticket2.php on line 1119
+[26-Mar-2019 13:52:45 America/Chicago] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, string given in /home/omiguel/public_html/mesa/alta_misticketphp.php on line 399
+[26-Mar-2019 13:52:59 America/Chicago] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, string given in /home/omiguel/public_html/mesa/alta_ticketphp.php on line 1795
+[26-Mar-2019 14:12:31 America/Chicago] PHP Warning:  mysql_num_rows() expects parameter 1 to be resource, string given in /home/omiguel/public_html/mesa/alta_ticket2.php on line 1116
+[26-Mar-2019 14:12:31 America/Chicago] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, string given in /home/omiguel/public_html/mesa/alta_ticket2.php on line 1119
+[26-Mar-2019 14:14:01 America/Chicago] PHP Warning:  mysql_num_rows() expects parameter 1 to be resource, string given in /home/omiguel/public_html/mesa/alta_ticket2.php on line 1116
+[26-Mar-2019 14:14:01 America/Chicago] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, string given in /home/omiguel/public_html/mesa/alta_ticket2.php on line 1119
+[26-Mar-2019 14:20:56 America/Chicago] PHP Warning:  mysql_num_rows() expects parameter 1 to be resource, string given in /home/omiguel/public_html/mesa/alta_ticket2.php on line 1116
+[26-Mar-2019 14:20:56 America/Chicago] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, string given in /home/omiguel/public_html/mesa/alta_ticket2.php on line 1119
+[26-Mar-2019 14:21:11 America/Chicago] PHP Warning:  mysql_num_rows() expects parameter 1 to be resource, string given in /home/omiguel/public_html/mesa/alta_ticket2.php on line 1116
+[26-Mar-2019 14:21:11 America/Chicago] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, string given in /home/omiguel/public_html/mesa/alta_ticket2.php on line 1119
+[26-Mar-2019 14:21:14 America/Chicago] PHP Warning:  mysql_num_rows() expects parameter 1 to be resource, string given in /home/omiguel/public_html/mesa/alta_ticket2.php on line 1116
+[26-Mar-2019 14:21:14 America/Chicago] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, string given in /home/omiguel/public_html/mesa/alta_ticket2.php on line 1119
+[26-Mar-2019 14:24:03 America/Chicago] PHP Warning:  mysql_num_rows() expects parameter 1 to be resource, string given in /home/omiguel/public_html/mesa/alta_ticket2.php on line 1116
+[26-Mar-2019 14:24:03 America/Chicago] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, string given in /home/omiguel/public_html/mesa/alta_ticket2.php on line 1119
+[01-Apr-2019 10:47:19 America/Chicago] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, string given in /home/omiguel/public_html/mesa/alta_ticketphp.php on line 1795
+[03-Apr-2019 13:55:30 America/Chicago] PHP Warning:  mysql_num_rows() expects parameter 1 to be resource, string given in /home/omiguel/public_html/mesa/alta_ticket2.php on line 1116
+[03-Apr-2019 13:55:30 America/Chicago] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, string given in /home/omiguel/public_html/mesa/alta_ticket2.php on line 1119
+[03-Apr-2019 14:00:58 America/Chicago] PHP Warning:  mysql_num_rows() expects parameter 1 to be resource, string given in /home/omiguel/public_html/mesa/alta_ticket2.php on line 1116
+[03-Apr-2019 14:00:58 America/Chicago] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, string given in /home/omiguel/public_html/mesa/alta_ticket2.php on line 1119
+[04-Apr-2019 15:35:41 America/Chicago] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, string given in /home/omiguel/public_html/mesa/alta_ticketphp.php on line 1795
+[10-Apr-2019 10:26:57 America/Chicago] PHP Warning:  mysql_num_rows() expects parameter 1 to be resource, string given in /home/omiguel/public_html/mesa/alta_ticket2.php on line 1116
+[10-Apr-2019 10:26:57 America/Chicago] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, string given in /home/omiguel/public_html/mesa/alta_ticket2.php on line 1119
+[10-Apr-2019 10:36:00 America/Chicago] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, string given in /home/omiguel/public_html/mesa/alta_ticketphp.php on line 1795
+[10-Apr-2019 10:57:52 America/Chicago] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, string given in /home/omiguel/public_html/mesa/alta_ticketphp.php on line 1795
+[10-Apr-2019 11:02:06 America/Chicago] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, string given in /home/omiguel/public_html/mesa/alta_ticketphp.php on line 1795
+[10-Apr-2019 11:02:30 America/Chicago] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, string given in /home/omiguel/public_html/mesa/alta_ticketphp.php on line 1795
+[10-Apr-2019 11:04:11 America/Chicago] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, string given in /home/omiguel/public_html/mesa/alta_ticketphp.php on line 1795
+[10-Apr-2019 11:10:27 America/Chicago] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, string given in /home/omiguel/public_html/mesa/alta_ticketphp.php on line 1795
+[10-Apr-2019 11:20:22 America/Chicago] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, string given in /home/omiguel/public_html/mesa/alta_ticketphp.php on line 1795
+[10-Apr-2019 11:35:35 America/Chicago] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, string given in /home/omiguel/public_html/mesa/alta_ticketphp.php on line 1795
+[10-Apr-2019 12:01:04 America/Chicago] PHP Fatal error:  Call to undefined method Ticket::getlocalidadEntrega() in /home/omiguel/public_html/mesa/alta_ticketphp.php on line 207
+[10-Apr-2019 12:03:42 America/Chicago] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, string given in /home/omiguel/public_html/mesa/alta_ticketphp.php on line 1795
+[10-Apr-2019 12:33:33 America/Chicago] PHP Fatal error:  Call to undefined method Ticket::getlocalidadEntrega() in /home/omiguel/public_html/mesa/alta_ticketphp.php on line 207
+[10-Apr-2019 12:34:12 America/Chicago] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, string given in /home/omiguel/public_html/mesa/alta_ticketphp.php on line 1795
+[10-Apr-2019 12:44:59 America/Chicago] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, string given in /home/omiguel/public_html/WEB-INF/Classes/Ticket.class.php on line 359
+[10-Apr-2019 12:44:59 America/Chicago] PHP Fatal error:  Call to undefined method Ticket::getlocalidadEntrega() in /home/omiguel/public_html/mesa/alta_ticketphp.php on line 207
+[10-Apr-2019 12:48:43 America/Chicago] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, string given in /home/omiguel/public_html/mesa/alta_ticketphp.php on line 1795
+[10-Apr-2019 15:49:40 America/Chicago] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, string given in /home/omiguel/public_html/mesa/alta_ticketphp.php on line 1795
+[22-Apr-2019 08:51:24 America/Chicago] PHP Fatal error:  Call to undefined method Ticket::getlocalidadEntrega() in /home/omiguel/public_html/mesa/alta_ticketphp.php on line 207
+[22-Apr-2019 09:02:38 America/Chicago] PHP Fatal error:  Call to undefined method Ticket::getlocalidadEntrega() in /home/omiguel/public_html/mesa/alta_ticketphp.php on line 207
+[22-Apr-2019 09:25:54 America/Chicago] PHP Fatal error:  Call to undefined method Ticket::getlocalidadEntrega() in /home/omiguel/public_html/mesa/alta_ticketphp.php on line 207
+[22-Apr-2019 10:46:27 America/Chicago] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, string given in /home/omiguel/public_html/mesa/alta_misticketphp.php on line 399
+[23-Apr-2019 10:40:25 America/Chicago] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, string given in /home/omiguel/public_html/mesa/alta_misticketphp.php on line 399
+[23-Apr-2019 12:54:05 America/Chicago] PHP Fatal error:  Call to undefined method Ticket::getlocalidadEntrega() in /home/omiguel/public_html/mesa/alta_ticketphp.php on line 207
+[10-May-2019 12:06:39 America/Chicago] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, string given in /home/omiguel/public_html/mesa/alta_ticketphp.php on line 1719
+[10-May-2019 12:10:06 America/Chicago] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, string given in /home/omiguel/public_html/mesa/alta_misticketphp.php on line 399
+[13-May-2019 09:19:05 America/Chicago] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, string given in /home/omiguel/public_html/mesa/alta_misticketphp.php on line 399
+[13-May-2019 09:20:45 America/Chicago] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, string given in /home/omiguel/public_html/mesa/alta_ticketphp.php on line 1719
