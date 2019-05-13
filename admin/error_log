@@ -1,0 +1,15 @@
+[26-Mar-2019 09:34:50 America/Mexico_City] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, string given in /home/omiguel/public_html/admin/alta_evento_operador.php on line 123
+[04-Apr-2019 13:06:32 America/Chicago] PHP Warning:  in_array() expects parameter 2 to be array, null given in /home/omiguel/public_html/admin/alta_impresoraMultifuncional.php on line 100
+[04-Apr-2019 13:06:32 America/Chicago] PHP Warning:  in_array() expects parameter 2 to be array, null given in /home/omiguel/public_html/admin/alta_impresoraMultifuncional.php on line 100
+[04-Apr-2019 13:06:32 America/Chicago] PHP Warning:  in_array() expects parameter 2 to be array, null given in /home/omiguel/public_html/admin/alta_impresoraMultifuncional.php on line 100
+[04-Apr-2019 13:06:32 America/Chicago] PHP Warning:  in_array() expects parameter 2 to be array, null given in /home/omiguel/public_html/admin/alta_impresoraMultifuncional.php on line 100
+[04-Apr-2019 13:06:32 America/Chicago] PHP Warning:  in_array() expects parameter 2 to be array, null given in /home/omiguel/public_html/admin/alta_impresoraMultifuncional.php on line 100
+[04-Apr-2019 13:06:32 America/Chicago] PHP Warning:  in_array() expects parameter 2 to be array, null given in /home/omiguel/public_html/admin/alta_impresoraMultifuncional.php on line 100
+[04-Apr-2019 13:06:32 America/Chicago] PHP Warning:  in_array() expects parameter 2 to be array, null given in /home/omiguel/public_html/admin/alta_impresoraMultifuncional.php on line 100
+[04-Apr-2019 13:06:55 America/Chicago] PHP Warning:  in_array() expects parameter 2 to be array, null given in /home/omiguel/public_html/admin/alta_formatoAmplio.php on line 84
+[04-Apr-2019 13:06:55 America/Chicago] PHP Warning:  in_array() expects parameter 2 to be array, null given in /home/omiguel/public_html/admin/alta_formatoAmplio.php on line 84
+[04-Apr-2019 13:06:55 America/Chicago] PHP Warning:  in_array() expects parameter 2 to be array, null given in /home/omiguel/public_html/admin/alta_formatoAmplio.php on line 84
+[04-Apr-2019 13:06:55 America/Chicago] PHP Warning:  in_array() expects parameter 2 to be array, null given in /home/omiguel/public_html/admin/alta_formatoAmplio.php on line 84
+[04-Apr-2019 13:06:55 America/Chicago] PHP Warning:  in_array() expects parameter 2 to be array, null given in /home/omiguel/public_html/admin/alta_formatoAmplio.php on line 84
+[23-Apr-2019 11:16:54 America/Chicago] PHP Fatal error:  Call to undefined method PermisosSubMenu::getModeloSistema() in /home/omiguel/public_html/admin/lista_componentes_pakal.php on line 19
+[13-May-2019 09:45:15 America/Chicago] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, string given in /home/omiguel/public_html/admin/lista_equipos.php on line 56
