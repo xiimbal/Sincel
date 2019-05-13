@@ -1,0 +1,79 @@
+<?php
+
+session_start();
+if (!isset($_SESSION['user']) || $_SESSION['user'] == "") {
+    header("Location: ../index.php");
+}
+include_once("../../Classes/Factura2.class.php");
+include_once("../../Classes/CatalogoFacturacion.class.php");
+include_once("../../Classes/Concepto.class.php");
+include_once("../../Classes/XMLReadAbraham.class.php");
+include_once("../../Classes/Empresa.class.php");
+include_once("../../Classes/Cliente.class.php");
+include_once("../../Classes/Contrato.class.php");
+
+$cat = new CatalogoFacturacion();
+$query = $cat->obtenerLista("SELECT FacturaXML,PeriodoFacturacion,RFCEmisor,RFCReceptor,TipoArrendamiento FROM c_factura WHERE IdFactura=" . $_POST['id']);
+if ($rs = mysql_fetch_array($query)) {
+    //echo $rs['FacturaXML'];
+    $xml = new XMLReadAbraham();
+    if(!$xml->ReadXMLSinValidacion($rs['FacturaXML'])){
+        echo "Error: no se pudo leer el XML correctamente";
+        return;
+    }
+    $empresa = new Empresa();
+    $empresa->setRFC($rs['RFCEmisor']);
+    $empresa->getRegistrobyRFC();
+    $factura = new Factura();
+    $factura->setIdEmpresa($empresa->getId());
+    $factura->setMetodoPago($xml->getMetodoDePago());
+    $factura->setFormaPago($xml->getFormaDePago());
+    $factura->setPeriodoFacturacion($rs['PeriodoFacturacion']);
+    $cliente = new Cliente();
+    $cliente->getRegistroByRFC($rs['RFCReceptor']);
+    $factura->setRFCReceptor($cliente->getClaveCliente());
+    $factura->setRFCEmisor($empresa->getId());
+    $factura->setUsuarioCreacion($_SESSION['user']);
+    $factura->setUsuarioUltimaModificacion($_SESSION['user']);
+    $factura->setPantalla("PHP Copiar Factura Lectura");
+    $factura->setId_TipoFactura(1);
+    if(isset($rs['TipoArrendamiento']) && $rs['TipoArrendamiento']!=""){
+        $factura->setTipoArrendamiento($rs['TipoArrendamiento']);
+    }    
+    
+    $contrato = new Contrato();
+    $result = $contrato->getRegistroValidacion($cliente->getClaveCliente());
+    while($rs = mysql_fetch_array($result)){
+        $factura->setNumCtaPago($rs['NumeroCuenta']);
+    }
+    
+    if ($factura->NuevaPreFactura()) {
+        $concepto = new Concepto();
+        $concepto->setIdFactura($factura->getIdFactura());
+        $concepto->setPantalla("PHP Controller_nuevo_concepto");
+        $concepto->setFechaCreacion("NOW()");
+        $concepto->setFechaUltimaModificacion("NOW()");
+        $concepto->setUsuarioCreacion($_SESSION['user']);
+        $concepto->setTipo("null");
+        $concepto->setId_articulo("null");
+        $concepto->setUsuarioUltimaModificacion($_SESSION['user']);        
+        foreach ($xml->getConceptos() as $val) {
+            $concepto->setCantidad($val[0]);            
+            if ($val[1] == 0) {
+                $concepto->setUnidad("Servicio");
+            } else {
+                $concepto->setUnidad($val[1]);
+            }
+            $concepto->setDescripcion($val[2]);
+            $concepto->setPrecioUnitario($val[3]);
+            $concepto->nuevoRegistro();
+        }
+        echo "Se generó la pre-factura con el folio 
+            <a href='principal.php?mnu=facturacion&action=alta_factura&id=" . $factura->getIdFactura() . "' target='_blank'>" . $factura->getFolio() . "</a>, se puede consultar en facturas lecturas";
+    } else {
+        echo "Error: La factura no se pudo copiar";
+    }
+} else {
+    echo "Error: no se encontro el xml";
+}
+

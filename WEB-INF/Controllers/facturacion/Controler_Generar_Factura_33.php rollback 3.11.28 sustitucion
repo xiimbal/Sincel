@@ -1,0 +1,744 @@
+<?php
+
+session_start();
+if (!isset($_SESSION['user']) || $_SESSION['user'] == "") {
+    header("Location: ../index.php");
+}
+include_once("../../Classes/ReporteFacturacion2.class.php");
+include_once("../../Classes/XML_Facturacion.class.php");
+include_once("../../Classes/Factura.class.php");
+include_once("../../Classes/Factura2.class.php");
+include_once("../../Classes/FacturaExtra.class.php");
+include_once("../../Classes/Localidad.class.php");
+include_once("../../Classes/Concepto.class.php");
+include_once("../../Classes/Empresa.class.php");
+include_once("../../Classes/Cliente.class.php");
+include_once("../../Classes/ccliente.class.php");
+include_once("../../Classes/AddendaDetalle.class.php");
+require_once("../../Classes/nu_soap/nusoap.php");
+include_once("../../Classes/PDFFactura.class.php");
+include_once("../../Classes/EnLetras.class.php");
+include_once("../../Classes/CFDI.class.php");
+include_once("../../Classes/Base64Convert.class.php");
+include_once("../../Classes/XMLReadSAT.class.php");
+include_once("../../Classes/XMLAbraham.class.php");
+include_once("../../Classes/PAC.class.php");
+include_once("../../Classes/phpqrcode/qrlib.php");
+include_once("../../Classes/FacturaAbraham.class.php");
+include_once("../../Classes/Catalogo.class.php");
+include_once("../../Classes/PagoParcial.class.php");
+include_once("../../Classes/Contrato.class.php");
+include_once("../../Classes/DatosFacturacionEmpresa.class.php");
+include_once("../../Classes/UsoCFDI.class.php");
+include_once("../../Classes/RegimenFiscal.class.php");
+include_once("../../Classes/PagoParcial.class.php");
+include_once("../../Classes/TipoMoneda.class.php");
+include_once("../../Classes/FacturaTimbradaUso.class.php");
+
+//************************************************* *JT 25/10/18
+$bandera = new FacturaTimbradaUso();
+
+$posicion = $bandera->nuevoRegistroBandera(); 
+if($posicion>1){
+    $timpoEspera=$posicion*2;
+    sleep($timpoEspera);
+}
+
+//******************************************************************
+
+if (isset($_GET['id']) && $_GET['id'] != "") {
+    date_default_timezone_set("America/Mexico_City");
+
+    $ndc = false;
+    $tipo = "factura";
+    if (isset($_POST['ndc']) && $_POST['ndc'] == "1") {
+        $ndc = true;
+        $tipo = "nota de crédito";
+    }
+
+    if (isset($_POST['form'])) {
+        $parametros = "";
+        parse_str($_POST['form'], $parametros);
+    }
+    $contrato = new Contrato();
+    $reporte = new ReporteFacturacion2();
+    $reporte->setFolio($_GET['id']);
+    $factura = new Factura();
+    $factura->setIdFactura($_GET['id']);
+
+    //Se verifica que no exista una factura del mismo periodo a detalle
+    if ($factura->verificarFacturasDobles()) {
+        echo "Error: factura doble del mismo periodo: " . $factura->getMensaje() . "<br/>";
+        if(!$bandera->liberarProcesoTimbreado())
+            echo"<br>No se borro correctamente los registros";  
+        return;
+    }
+
+    $xml = new XML_Facturacion();
+    $pdf = new PDFFactura();             //Crea objeto PDF
+    $ccliente = new Cliente();
+    $pagoParcial = new PagoParcial();
+
+    $factura->getRegistrobyID();
+    $factura->setUsuarioCreacion($_SESSION['user']);
+    $factura->setUsuarioUltimaModificacion($_SESSION['user']);
+    $factura->setPantalla("PHP Generar Factura");
+    $ccliente->getRegistroById($factura->getRFCReceptor());
+    $IdSeriePrefijo = $factura->getIdSerie();
+    if (isset($IdSeriePrefijo) && $IdSeriePrefijo != "") {
+        $cata = new Catalogo();
+        $cons = "SELECT Prefijo FROM c_serie WHERE IdSerie = $IdSeriePrefijo";
+        $result = $cata->obtenerLista($cons);
+        while ($rs = mysql_fetch_array($result)) {
+            $xml->setPrefijoSerie($rs['Prefijo']);
+        }
+    }
+    $tipoMoneda = new TipoMoneda();
+    $tipoMoneda->getRegistroById($factura->getIdTipoMoneda());
+
+    $cero = "";
+    if ((date("i") - 1) < 10) {
+        $cero = "0";
+    }
+
+    $timestamp = strtotime(date('H:i')) - 3 * 60; //El número de minutos que se quiere retrasar se multiplica por los 60 segundos.
+    $time = date('H:i', $timestamp);
+
+    $usoCFDI = new UsoCFDI();
+    $usoCFDI->getRegistroById($factura->getIdUsoCFDI());
+    $xml->setUsoCFDI($usoCFDI->getClaveCFDI());
+    $xml->setFecha(date("Y-m-d") . "T" . $time . date(":s"));
+    $xml->setFormaDePago($factura->getClaveFormaPago($factura->getFormaPago()));
+
+    $factExtra = new FacturaExtra();
+    $factExtra->setId_factura($_GET['id']);
+    $obs_in = "";
+    $comentario = "";
+    $valores = array();
+
+    //Si en el parametro del cliente está encendio mostrar el mes de contrato y además es una factura de arrendamiento
+    $result = $contrato->getRegistroValidacion($ccliente->getClaveCliente());
+    if ($rs = mysql_fetch_array($result)) {
+        $resultValores = $contrato->getValorPorContrato($rs['NoContrato']);
+        while ($rsValores = mysql_fetch_array($resultValores)) {
+            if ((int) $rsValores['mostrarPDF'] == 1) {
+                $valores[$rsValores['campo']] = $rsValores['valor'];
+            }
+        }
+        $pdf->setValores($valores);
+    }
+
+    if ($factExtra->getRegistroByFactura()) {
+        $obs_in = $factExtra->getObservaciones_dentro_xml();
+        $comentario .= $factExtra->getObservaciones_fuera_xml();
+        if ($factExtra->getNumero_orden() != "") {
+            $comentario .= " Número de orden:" . $factExtra->getNumero_orden();
+        }
+        if ($factExtra->getNumero_proveedor() != "") {
+            $comentario .= " Número de proveedor:" . $factExtra->getNumero_proveedor();
+        }
+    }
+    $concepto = new Concepto();
+    $concepto->setObs_in($obs_in);
+    $subtotal = $concepto->subtotalbyFacturaObs33($_GET['id']);
+    $tabla = $concepto->getConceptos_array();
+    $porcentaje_descuento = $factura->getDescuentos();
+    $descuento = 0;
+    $xml->setVersion("3.3");
+    $xml->setSubTotal(number_format($subtotal, 2, ".", ""));
+    /* Manejo de descuentos */
+    if ($tabla !== null && !empty($tabla)) { //Descuentos por partida       
+        foreach ($tabla as $datos_partida) {//Recorremos las partidas para ver si hay descuentos
+            if (isset($datos_partida[8]) && !empty($datos_partida[8])) {
+                if (isset($datos_partida[9]) && $datos_partida[9] == "1") {//Si el descuento es por porcentaje
+                    $costo_descuento = number_format($datos_partida[6] * ($datos_partida[8] / 100), 2, ".", "");
+                } else {
+                    $costo_descuento = number_format($datos_partida[8], 2, ".", "");
+                }
+                $descuento += $costo_descuento;
+            }
+        }
+    }
+
+    if (!empty($porcentaje_descuento)) {//Porcentaje de descuento general
+        $descuento += number_format(($subtotal * (float) ($porcentaje_descuento / 100)), 2, ".", "");
+        $xml->setPorcentaje_descuento($porcentaje_descuento);
+    }
+
+    if (!empty($descuento)) {
+        $descuento = number_format($descuento, 2, ".", "");
+        $xml->setDescuento($descuento);
+    }
+
+    //$xml->setTotal( $total);
+    $xml->setTipoDeComprobante($factura->getTipoComprobante());
+    $xml->setMetodoDePago($factura->getClaveMetodoPago($factura->getMetodoPago()));
+    //$xml->setMoneda("MXN"); //Esto ahorita está por default pero debería sacarse de un catálogo de tipo de moneda
+    $xml->setMoneda($tipoMoneda->getAbreviatura());
+    $tipoCambio = $factura->getTipoCambio();
+    if (isset($tipoCambio) && $tipoCambio == "1.00") {
+        $tipoCambio = "1";
+    }
+    $xml->setTipoCambio($tipoCambio);
+
+    $empresa = new Empresa();
+    $empresa->setId($factura->getRFCEmisor());
+    $empresa->getRegistrobyID();
+
+    $regimenFiscal = new RegimenFiscal();
+    $regimenFiscal->getRegistroById($empresa->getRegimenFiscal());
+
+    $xml->setRegimen($empresa->getRegimenFiscal());
+    $xml->setLugarExpedicion($empresa->getCP());
+    $xml->setEmisor_rfc($empresa->getRFC());
+    $xml->setEmisor_nombre($empresa->getRazonSocial());
+    $xml->setEmisor_rfc($empresa->getRFC());
+
+    //
+    $xml->setExpedido_CP($empresa->getCP());
+    $xml->setExpedido_Calle($empresa->getCalle());
+    $xml->setExpedido_Col($empresa->getColonia());
+    $xml->setExpedido_Estado($empresa->getEstado());
+    $xml->setExpedido_Mun($empresa->getDelegacion());
+    $xml->setExpedido_NoExt($empresa->getNoExterior());
+    $xml->setExpedido_NoInt($empresa->getNoInterior());
+    $xml->setExpedido_Pais($empresa->getPais());
+
+    //
+    //$ccliente->setClaveCliente($factura->getRFCReceptor());        
+    $localidad = new Localidad();
+    if ($factura->getIdDomicilioFiscal() != "") {
+        $localidad->getLocalidadById($factura->getIdDomicilioFiscal());
+    } else {
+        $localidad->getLocalidadByClaveTipo($factura->getRFCReceptor(), "3");
+    }
+
+    $xml->setReceptor_Dom_CP($localidad->getCodigoPostal());
+    $xml->setReceptor_rfc($ccliente->getRFC());
+    $xml->setReceptor_nombre($ccliente->getNombreRazonSocial());
+    $xml->setReceptor_Dom_Calle($localidad->getCalle());
+    $xml->setReceptor_Dom_Col($localidad->getColonia());
+    $xml->setReceptor_Dom_Est($localidad->getEstado());
+    $xml->setReceptor_Dom_Mun($localidad->getDelegacion());
+    $xml->setReceptor_Dom_NoExt($localidad->getNoExterior());
+    $xml->setReceptor_Dom_NoInt($localidad->getNoInterior());
+    $xml->setReceptor_Dom_Pais("México");
+    $xml->setConceptos($concepto->getConceptos_array());
+    $xml->setImpuestos_totalImpuestosTrasladados(($subtotal - $descuento) * .16);
+    $xml->setImpuestos_Trasladado(Array(Array("002", "0.160000", ($subtotal - $descuento) * 0.16)));
+    if (!$ndc) {
+        $xml->setTipoDeComprobante("I");
+    } else {
+        $xml->setTipoDeComprobante("E");
+    }
+
+    /* Agregar addendas */
+    $addendas = array();
+    $cliente_detalle = new ccliente();
+    if ($cliente_detalle->getregistrobyID($ccliente->getClaveCliente()) && $cliente_detalle->getIdAddenda() != NULL && $cliente_detalle->getIdAddenda() != "") {
+        $detalle_addenda = new AddendaDetalle();
+        $result = $detalle_addenda->getRegistrosByAdenda($cliente_detalle->getIdAddenda());
+        while ($rs = mysql_fetch_array($result)) {
+            $aux = array();
+            array_push($aux, $rs['campo']);
+            if (isset($parametros['addenda_' . $rs['id_kaddenda']])) {
+                array_push($aux, $parametros['addenda_' . $rs['id_kaddenda']]);
+            } else {
+                array_push($aux, $rs['valor']);
+            }
+            array_push($addendas, $aux);
+        }
+        if (!empty($addendas)) {
+            $xml->setAddendas($addendas);
+
+            if ($cliente_detalle->getMostrarAddenda() == "1") {
+                $pdf->setAddendas($addendas);
+            }
+        }
+    }
+
+    $cfdi = new CFDI();
+    $cfdi->setId_Cfdi($empresa->getId_Cfdi());
+    $cfdi->getRegistrobyID();
+    $xml->setNoCertificado($cfdi->getNoCertificado());
+    $xml->setFolio(str_replace($xml->getPrefijoSerie(), "", $factura->getFolio()));
+
+    //datos del comprobante
+    $anadirSerie = "";
+    if ($xml->getPrefijoSerie() != "") {
+        $anadirSerie = "|" . $xml->getPrefijoSerie();
+    }
+    $anadirDescuento = "";
+    if (!empty($descuento)) {
+        $anadirDescuento = "|FXW&&&";
+    }
+
+    $totalDescuentoTrampa = 0;
+    $base = new Base64Convert();
+    $base->setFile("../../../CSD/" . $cfdi->getCsd());
+    $xml->setCertificado($base->Convertbase64File());
+
+    $pac = new PAC();
+    $pac->setId_pac($empresa->getId_pac());
+    $pac->getRegistrobyID();
+    $soapclient = new nusoap_client($pac->getDireccion_timbrado(), $esWSDL = true);
+    $usuario = $pac->getUsuario();
+    $clave = $pac->getPassword();
+
+    $file = fopen("../../../XML/XML-" . $_GET['id'] . ".xml", "w");
+
+    /* Guardamos el folio */
+    if (!$factura->folioNotimbrado()) {
+        $factura->folioReciente();
+    }
+    $xml->setFolio(str_replace($xml->getPrefijoSerie(), "", $factura->getFolio()));
+
+    if ($ndc && isset($_POST['IdFacturaNET']) && $_POST['IdFacturaNET'] != "0") {
+        $factura_aux = new Factura_NET();
+        if ($factura_aux->getRegistroById($_POST['IdFacturaNET'])) {
+            $xml->setTipoRelacion($factura->getClaveTipoRelacion($factura->getTipoRelacion(), FALSE));
+            $pdf->setTipoRelacion($factura->getClaveTipoRelacion($factura->getTipoRelacion(), true));
+            $facs_relacion = array($factura_aux->getUUID());
+            $xml->setUUIDRelacionado($facs_relacion);
+            $pdf->setUUIDRelacionado($xml->getUUIDRelacionado());
+            $cadena_original_aux = "|" . $xml->getTipoRelacion();
+            foreach ($facs_relacion as $value) {
+                $cadena_original_aux .= "|$value";
+            }
+        }
+    }
+
+    //Condiciones de pago
+    $condiciones_cadena = "";
+    if ($factura->getDiasCredito() != "") {
+        $xml->setCondicionesPago($factura->getDiasCredito() . " días");
+        $pdf->setCondicionesPago($xml->getCondicionesPago());
+    } else {
+        $xml->setCondicionesPago("CONTADO");
+        $pdf->setCondicionesPago($xml->getCondicionesPago());
+    }
+
+    $cadena_original = "||" . $xml->getVersion() . $anadirSerie . "|" . $xml->getFolio() . "|" . $xml->getFecha() . "|" . $xml->getFormaDePago() . "|" . $xml->getNoCertificado() . "|" . $xml->getCondicionesPago();
+    $cadena_original .= "|" . $xml->getSubTotal() . $anadirDescuento . "|" . $xml->getMoneda() . "|" . $xml->getTipoCambio() . "|XYZ&&&|" . $xml->getTipoDeComprobante() . "|" . $xml->getMetodoDePago() . "|" . $xml->getLugarExpedicion();
+    $cadena_original .= $cadena_original_aux;
+    $cadena_original .= "|" . $xml->getEmisor_rfc() . "|" . $xml->getEmisor_nombre() . "|" . $xml->getRegimen();
+    $cadena_original .= "|" . $xml->getReceptor_rfc() . "|" . $xml->getReceptor_nombre() . "|" . $xml->getUsoCFDI();
+
+    $array = $xml->getConceptos();
+
+    $totalImpuestosTrasladadosSuma = 0;
+    for ($i = 0; $i < count($array); $i++) {
+        $arr = $array[$i];
+        $arr[0] = str_replace(",", "", $arr[0]);
+        if ($arr[6] == 0) {
+            continue;
+        }
+
+        $descuento_partida = "";
+        $total_partida = $arr[6];
+        $costo_descuento = 0;
+        $subtotal_partida = $arr[6];
+        if (isset($arr[8]) && !empty($arr[8])) {//Si hay descuento por partida
+            if (isset($arr[9]) && $arr[9] == "1") {//Si el descuento es por porcentaje
+                $costo_descuento = $arr[6] * ($arr[8] / 100);
+            } else {
+                $costo_descuento = $arr[8];
+            }
+            $subtotal_partida = $arr[6] - $costo_descuento;
+        }
+
+        if (!empty($porcentaje_descuento)) {
+            $costo_descuento = number_format($subtotal_partida * ($porcentaje_descuento / 100), 2, ".", "");
+        }
+
+        if (!empty($costo_descuento)) {
+            $total_partida = $arr[6] - $costo_descuento;
+            $descuento_partida = "|" . $costo_descuento;
+            $totalDescuentoTrampa += $costo_descuento;
+        }
+
+        $cadena_original .= trim(preg_replace('/\s\s+/', ' ', "|" . $arr[1] . "|" . $arr[0] . "|" . $arr[2] . "|" . $arr[3] . "|" . substr($arr[4], 0, 1000) . "|" . $arr[5] . "|" . number_format($arr[6], 4, ".", "") . $descuento_partida));
+        $cadena_original .= trim(preg_replace('/\s\s+/', ' ', "|" . number_format($total_partida, 4, ".", "") . "|002|Tasa|0.160000|" . number_format($total_partida * 0.16, 4, ".", "")));
+        $totalImpuestosTrasladadosSuma += number_format($total_partida * 0.16, 4, ".", "");
+    }
+    $array = $xml->getImpuestos_Trasladado();
+    for ($i = 0; $i < count($array); $i++) {
+        $arr = $array[$i];
+        $cadena_original .= trim(preg_replace('/\s\s+/', ' ', "|" . $arr[0] . "|Tasa|" . $arr[1] . "|" . number_format($totalImpuestosTrasladadosSuma, 2, ".", "")));
+    }
+    $cadena_original .= "|" . number_format($totalImpuestosTrasladadosSuma, 2, ".", "");
+    $total = number_format($subtotal - $totalDescuentoTrampa + $totalImpuestosTrasladadosSuma, 2, ".", "");
+
+    $xml->setTotal($total);
+    $xml->setDescuento($totalDescuentoTrampa);
+
+    $cadena_original .= "||";
+    $cadena_original = trim(str_replace("| ", "|", str_replace(" |", "|", preg_replace('/\s\s+/', ' ', $cadena_original))));
+    $cadena_original = str_replace("|XYZ&&&|", "|" . $xml->getTotal() . "|", $cadena_original);
+    $cadena_original = str_replace("|FXW&&&", "|" . $xml->getDescuento(), $cadena_original);
+
+    $factura->setCadenaOriginal($cadena_original);
+
+    $key = '../../../CSD/' . $cfdi->getPem();
+    $fp = fopen($key, "r");
+    if (!$fp) {
+        error_log("Unable to open keyfile $key");
+    }
+    $raw_key_data = fread($fp, 8192);
+    //$priv_key = fread($fp, 8192);
+    fclose($fp);
+    $pkeyid = openssl_get_privatekey($raw_key_data, $cfdi->getCsd_password());
+    if ($pkeyid === FALSE) {
+        echo "Unable to extract private key from raw key data: " . openssl_error_string();
+    }
+    //$pkeyid = openssl_get_privatekey($priv_key, "12345678a");
+    if (!openssl_sign($cadena_original, $raw_sig, $pkeyid, "RSA-SHA256")) {
+        echo "Unable to sign request $cadena_original: " . openssl_error_string();
+        $sello = "";
+    }
+    $sello = base64_encode($raw_sig);
+    $factura->setSello($sello);
+    $xml->setSello($sello);
+
+    $xmlcreado = $xml->CrearXML33();
+    /* guarda XML */
+    fwrite($file, $xmlcreado);
+    fclose($file);
+    $factura->setPathXML("XML-" . $_GET['id'] . ".xml");
+    $timbrado = FALSE;
+
+    //Decodificamos el CFDI a UTF8
+    $cfdix = (utf8_decode($xmlcreado));
+    if ($reporte->GenerarFactura($xmlcreado)) {
+        //Generamos el arreglo con los parametros para timbrado
+        $tim = array('cfdi' => $cfdix, 'usuario' => $usuario, 'clave' => $clave);
+        //Generamos el llamado al servicio de timbrado
+        $soap_timbrado = $soapclient->call('timbrado', $tim);
+        //Verificamos que el llamado se pudo hacer correctamente
+        if ($soap_timbrado == false) {
+            echo "No se logro contactar al PAC";
+        } else {
+            if (isset($soap_timbrado['return']['timbre']) && $soap_timbrado['return']['timbre'] != "") {
+                $timbrado = TRUE;
+                if (isset($_GET['id2']) && $_GET['id2'] != "0") {
+                    $factura->setFolio_respaldo($_GET['id2']);
+                }
+                $factura->UpdateXMLFactura();
+
+                $nombreArchivo = "XML/" . substr($xml->getEmisor_rfc(), 0, 3) . "_" . $factura->getFolio() . ".xml";
+                $nombreArchivoPDF = "PDF/" . substr($xml->getEmisor_rfc(), 0, 3) . "_" . $factura->getFolio() . ".pdf";
+                $file = fopen("../../../" . $nombreArchivo, "w");
+                //Agregamos addendas si es que hay
+                $xml_timbrado = $soap_timbrado['return']['timbre'];
+                if (!empty($addendas)) {
+                    $xmlstr = utf8_encode($xml_timbrado);
+
+                    $sxe = new SimpleXMLElement($xmlstr);
+                    //$sxe->addAttribute('tipo', 'documental');
+                    $nodo_addenda = $sxe->addChild('Addenda');
+                    $generales = $nodo_addenda->addChild('Generales');
+                    foreach ($addendas as $value) {
+                        $aux = $generales->addChild($value[0], $value[1]);
+                    }
+                    $xml_timbrado = $sxe->asXML();
+                    fwrite($file, ($xml_timbrado));
+                } else {
+                    fwrite($file, utf8_encode($xml_timbrado));
+                }
+                fclose($file);
+                $xmls = new XMLReadSAT();
+                $xmls->setFile("../../../" . $nombreArchivo);
+                $xmls->LeerXML33();
+                $factura->setSello($sello);
+                $factura->setFolioFiscal($xmls->getUuid());
+                $factura->setCadenaOriginal($cadena_original);
+
+                $catalogo = new Catalogo();
+
+                $fechaInicio = "";
+                $fechaFin = "";
+                $mes_contrato = "";
+                $total_meses = "";
+                //Si en el parametro del cliente está encendio mostrar el mes de contrato y además es una factura de arrendamiento
+                if ($ccliente->getMostarMesContrato() == "1" && $factura->getTipoArrendamiento() == "1") {
+                    $result = $contrato->getRegistroValidacion($ccliente->getClaveCliente());
+                    while ($rs = mysql_fetch_array($result)) {
+                        $fechaInicio = $rs['FechaInicio'];
+                        $fechaFin = $rs['FechaTermino'];
+                    }
+
+                    if (!empty($fechaInicio) && !empty($fechaFin)) {
+                        $consulta = "SELECT (TIMESTAMPDIFF(MONTH,'$fechaInicio','" . $factura->getFechaFacturacion() . "')+1) AS MesContrato, "
+                                . "TIMESTAMPDIFF(MONTH,'$fechaInicio','$fechaFin') AS DuracionMeses;";
+                        $result = $catalogo->obtenerLista($consulta);
+                        while ($rs = mysql_fetch_array($result)) {
+                            $mes_contrato = $rs['MesContrato'];
+                            $total_meses = $rs['DuracionMeses'];
+                        }
+                    }
+                }
+
+                //*AQUI SE CREA EL PDF                
+                $pdf->AddPage('P', 'Legal'); //Agrega hoja, Vertical, Carta
+                if (!$ndc) {
+                    $pdf->setTitulo("FACTURA");
+                    $pdf->setNdc(false);
+                    $pdf->setTipoComprobante("I Ingreso");
+                } else {
+                    $pdf->setTitulo("NOTA DE CRÉDITO");
+                    $pdf->setNdc(true);
+                    $pdf->setTipoComprobante("E Egreso");
+                }
+                $pdf->setFolioFiscal($xmls->getUuid());
+                $pdf->setFolio($factura->getFolio());
+                $pdf->setLogo($empresa->getArchivoLogo());
+                $pdf->setCSD_Emisor($cfdi->getNoCertificado());
+                $pdf->setCSD_Sat($cfdi->getNoSAT());
+                $pdf->setFecha_Cert(str_replace("T", " ", $xmls->getFecha()));
+                $pdf->setLugarExpedicion($empresa->getCP());
+                $pdf->setHoraEmision(str_replace("T", " ", $xml->getFecha()));
+                //$pdf->setHoraEmision("2018-08-29");
+                $pdf->setFormaPago($factura->getClaveFormaPago($factura->getFormaPago()) . " " . $factura->getNombreFormaPago($factura->getFormaPago()));
+                if ($factura->getDescripcionMetodoPago() != "") {
+                    $pdf->setMetodoPago($factura->getClaveMetodoPago($factura->getMetodoPago()) . " " . $factura->getDescripcionMetodoPago());
+                } else {
+                    $pdf->setMetodoPago($factura->getClaveMetodoPago($factura->getMetodoPago()) . " " . $factura->getNombreMetodoPago($factura->getMetodoPago()));
+                }
+
+                $pdf->setCondicionesPago($xml->getCondicionesPago());
+                $pdf->setNumeroCtaPago($factura->getNumCtaPago());
+                $pdf->setNombre_Emisor($empresa->getRazonSocial());
+                $pdf->setRFC_Emisor($empresa->getRFC());
+                $pdf->setRegimenFiscal_Emisor("(" . $empresa->getRegimenFiscal() . ") " . $regimenFiscal->getDescripcion());
+                $pdf->setCalle_Emisor($empresa->getCalle());
+                $pdf->setNo_Ext_Emisor($empresa->getNoExterior());
+                $pdf->setNo_int_Emisor($empresa->getNoInterior());
+                $pdf->setColonia_Emisor($empresa->getColonia());
+                $pdf->setEstado_Emisor(strtoupper($empresa->getEstado()));
+                $pdf->setDelegacion_Emisor($empresa->getDelegacion());
+                $pdf->setPais_Emisor($empresa->getPais());
+                $pdf->setCP_Emisor($empresa->getCP());
+                $pdf->setTel_Emisor($empresa->getTelefono());
+                $resultPeriodo = $factura->getMultiPeriodos();
+                if (mysql_num_rows($resultPeriodo) == 0) {
+                    $pdf->setPeriodo_Facturacion_Emisor($factura->getFechaFacturacionNombre());
+                } else {
+                    $periodos = "";
+                    while ($rs = mysql_fetch_array($resultPeriodo)) {
+                        $periodos .= (str_replace(" de", "", substr($catalogo->formatoFechaReportes($rs['Periodo']), 5)) . ", ");
+                    }
+                    if ($periodos != "") {
+                        $periodos = substr($periodos, 0, strlen($periodos) - 2);
+                    }
+                    $pdf->setPeriodo_Facturacion_Emisor($periodos);
+                }
+                $pdf->setClaveCliente($ccliente->getClaveCliente());
+                $pdf->setNombre_Receptor($ccliente->getNombreRazonSocial());
+                $pdf->setRFC_Receptor($ccliente->getRFC());
+                $pdf->setUsoCFDI("(" . $usoCFDI->getClaveCFDI() . ") " . $usoCFDI->getDescripcion());
+                $pdf->setRegimenFiscal_Receptor($empresa->getRegimenFiscal());
+                $pdf->setCalle_Receptor($localidad->getCalle());
+                $pdf->setNo_Ext_Receptor($localidad->getNoExterior());
+                $pdf->setNo_int_Receptor($localidad->getNoInterior());
+                $pdf->setColonia_Receptor($localidad->getColonia());
+                $pdf->setEstado_Receptor($localidad->getEstado());
+                $pdf->setDelegacion_Receptor($localidad->getDelegacion());
+                $pdf->setPais_Receptor("México");
+                $pdf->setCP_Receptor($localidad->getCodigoPostal());
+                $pdf->setTel_Receptor("");
+                $pdf->setLocalidad($localidad->getLocalidad());
+                $pdf->setPeriodo_Facturacion_Receptor($factura->getFechaFacturacionNombre());
+
+                if (!empty($descuento)) {
+                    $pdf->setDescuento($descuento);
+                }
+                $concepto->subtotalbyFacturaObs33($_GET['id']);
+                $pdf->setTabla($concepto->getConceptos_array());
+
+                $pdf->setSubtotal(number_format($subtotal - $descuento, 2));
+                $pdf->setIva(number_format($totalImpuestosTrasladadosSuma, 2));
+                $pdf->setTotal(number_format($total, 2));
+
+                $letras = new EnLetras();
+                $total_letra = str_replace(",", "", number_format($total, 2));
+                $total_letra_arr = explode(".", $total_letra);
+                $pdf->setNum_Letra(strtoupper($letras->ValorEnLetras($total_letra_arr[0], "")) . " " . $tipoMoneda->getAbreviatura() . " " . $total_letra_arr[1] . "/100");
+                $pdf->setSello_Digital($xmls->getSelloCSD());
+                $pdf->setSello_Emisor($xmls->getSelloSAT());
+                $pdf->setCadena_SAT($cadena_original);
+                $pdf->setComentarios($comentario);
+                $pdf->setMoneda("(" . $tipoMoneda->getAbreviatura() . ") " . $tipoMoneda->getTipoMoneda());
+                if (!empty($mes_contrato) && is_numeric($mes_contrato) && !empty($total_meses) && is_numeric($total_meses)) {
+                    $pdf->setMes_contrato("$mes_contrato de $total_meses");
+                }
+                $tempDir = "../../../PDF/";
+                $cadena = "https://verificacfdi.facturaelectronica.sat.gob.mx/default.aspx?re=" . $pdf->getRFC_Emisor() . "&rr=" . $pdf->getRFC_Receptor();
+                $tot = $pdf->getTotal();
+                $toa = explode(".", $tot);
+                $toa[0] = str_replace(",", "", $toa[0]);
+                $tot = $toa[0];
+                $tod = $toa[1];
+                for ($i = 0; $i < 10 - strlen($toa[0]); $i++) {
+                    $tot = "0" . $tot;
+                }
+                for ($i = 0; $i < 6 - strlen($toa[1]); $i++) {
+                    $tod = $tod . "0";
+                }
+                $cadena .= "&tt=" . $tot . "." . $tod . "&id=" . $pdf->getFolioFiscal();
+                QRcode::png($cadena, $tempDir . $_GET['id'] . ".png");
+                $pdf->setCbb($tempDir . $_GET['id'] . ".png");
+                $pdf->setLeyenda($_POST['leyenda']);
+                if ($factura->getMostrarSerie() == "1") {
+                    $pdf->setIdPrefactura($_GET['id']);
+                    $pdf->CrearPDF_DetalleSerie33(false);
+                } else {
+                    $pdf->setIdPrefactura($_GET['id']);
+                    $pdf->CrearPDF33();
+                }
+                $pdf->Output("../../../" . $nombreArchivoPDF, 'F');
+                //Abraham
+                $factAbra = new FacturaAbraham();
+                $factAbra->setRFCReceptor($xml->getReceptor_rfc());
+                $factAbra->setRFCEmisor($xml->getEmisor_rfc());
+                $factAbra->setNombreEmisor($xml->getEmisor_nombre());
+                $factAbra->setNombreReceptor($xml->getReceptor_nombre());
+                $factAbra->setFechaFacturacion("NOW()");
+                $factAbra->setFolio(str_replace($xml->getPrefijoSerie(), "", $factura->getFolio()));
+                $factAbra->setSerie($xml->getPrefijoSerie());
+                $factAbra->setFacturaXML(file_get_contents("../../../$nombreArchivo"));
+                $factAbra->setPathXML($nombreArchivo);
+                $factAbra->setPeriodoFacturacion($factura->getPeriodoFacturacion());
+                $factAbra->setEstadoFactura("1");
+                $factAbra->setFechaModificacion("NOW()");
+                $factAbra->setPathPDF($nombreArchivoPDF);
+                $factAbra->setFacturaEnviada("0");
+                $factAbra->setObservaciones("");
+                $factAbra->setFechaPago("null");
+                $factAbra->setNumTransaccion("null");
+                $factAbra->setCentrosCosto("");
+                if (!empty($descuento)) {
+                    $factAbra->setDescuento($descuento);
+                }
+                $factAbra->setTotal($total);
+                $factAbra->setCfdiXML(($cfdix));
+                $factAbra->setCfdiTimbrado((utf8_encode($soap_timbrado['return']['timbre'])));
+                $factAbra->setCfdiRespPac("");
+                $factAbra->setFolioFiscal($xmls->getUuid());
+                $factAbra->setEstatusFactura("null");
+                $factAbra->setCanceladaSAT("null");
+                $factAbra->setPendienteCancelar("0");
+                $factAbra->setUsuarioCreacion($_SESSION['user']);
+                $factAbra->setUsuarioModificacion($_SESSION['user']);
+                $factAbra->setUsuarioEnvio("null");
+                $factAbra->setFechaEnvio("null");
+                $factAbra->setTipoFactura("0");
+                if ($factura->getFacturaPagada() != null && $factura->getFacturaPagada() != "") {
+                    $factAbra->setFacturaPagada($factura->getFacturaPagada());
+                } else {
+                    $factAbra->setFacturaPagada(0);
+                }
+                $factAbra->setTipoArrendamiento($factura->getTipoArrendamiento());
+                $factAbra->setCFDI33(1);
+                $factAbra->setIdUsoCFDI($factura->getIdUsoCFDI());
+                $factAbra->setMetodoPago($factura->getMetodoPago());
+                $factAbra->setFormaPago($factura->getFormaPago());
+                $factAbra->setIdTipoMoneda($factura->getIdTipoMoneda());
+                $factAbra->setTipoCambio($factura->getTipoCambio());
+                $algo = $factura->getIdSerie();
+                $diasCredito = $factura->getDiasCredito();
+                if (isset($algo)) {
+                    $factAbra->setIdSerie($factura->getIdSerie());
+                }
+                if (isset($diasCredito)) {
+                    $factAbra->setDiasCredito($diasCredito);
+                }
+                if (!$ndc) {
+                    $factAbra->setTipoComprobante("ingreso");
+                    $factAbra->setIdFacturaRelacion("0");
+                } else {
+                    $factAbra->setTipoComprobante("egreso");
+                    if (isset($_POST['IdFacturaNET']) && $_POST['IdFacturaNET'] != "0") {
+                        $factAbra->setIdFacturaRelacion($_POST['IdFacturaNET']);
+                    } else {
+                        $factAbra->setIdFacturaRelacion("0");
+                    }
+                    //Aplicamos la NDC a la factura relacionada.
+                    $factura_relacion = new Factura_NET();
+                    if ($factura_relacion->getRegistroById($factAbra->getIdFacturaRelacion())) {
+                        //Agregamos el Pago parcial
+                        $pagosParciales = new PagoParcial();
+                        $pagosParciales->setId_factura($factura_relacion->getIdFactura());
+                        //$pagosParciales->setF($factura_relacion->getFolio());
+                        $pagosParciales->setImporte($factAbra->getTotal());
+                        $pagosParciales->setReferencia("");
+                        $pagosParciales->setObservaciones("Pago realizado a partir de la nota de crédito con folio: " . $factAbra->getFolio());
+                        $pagosParciales->setFechapago($factAbra->getFechaFacturacion());
+                        $pagosParciales->setUsuarioCreacion($_SESSION['user']);
+                        if ($factura_relacion->getCFDI33() == "1") {
+                            $pagosParciales->setIdFormaPago($factura_relacion->getFormaPago());
+                        } else {
+                            $pagosParciales->setIdFormaPago(1);
+                        }
+                        if (!$pagosParciales->nuevoRegistro(true)) {
+                            echo "<br/>Error: No se pudo registrar el importe pagado.<br/>";
+                        }
+
+                        //Marcar pre-factura como cancelada
+                        $empresa_relacion = new DatosFacturacionEmpresa();
+                        if ($empresa_relacion->getRegistroByRFC($factura_relacion->getRFCEmisor())) {
+                            $consulta = "UPDATE `c_factura` SET EstadoFactura = 1 WHERE Folio IN (SELECT Folio FROM c_folio_prefactura WHERE FolioTimbrado = '" . $factura_relacion->getSerie() . $factura_relacion->getFolio() . "' AND IdEmisor = " . $empresa->getId() . " ) AND RFCEmisor = " . $empresa->getId() . ";";
+                            $catalogo->obtenerLista($consulta);
+                        }
+                    } else {
+                        //echo "Error: no se pudo aplicar la NDC a la factura relacionada<br/>";
+                    }
+                }
+
+                if ($factAbra->newRegistro()) {
+                    $factura->insertarMultiPeriodosFacturados($factAbra->getIdFactura());
+                    $factura->marcarFacturadoEquiposPorFacturar();
+
+                    //Copiamos los pagos a la base de facturación
+                    $pagoParcial->setId_factura($_GET['id']);
+                    $pagoParcialFactura = new PagoParcial();
+                    $pagoParcialFactura->setId_factura($factAbra->getIdFactura());
+                    $result = $pagoParcial->getTabla(false);
+                    while ($rs = mysql_fetch_array($result)) {
+                        $pagoParcialFactura->setImporte($rs['importe']);
+                        $pagoParcialFactura->setFechapago($rs['fechapago']);
+                        $pagoParcialFactura->setCuentaBancaria($rs['idCuentaBancaria']);
+                        $pagoParcialFactura->setReferencia($rs['referencia']);
+                        $pagoParcialFactura->setObservaciones($rs['observaciones']);
+                        $pagoParcialFactura->setUsuarioCreacion($rs['UsuarioCreacion']);
+                        $pagoParcialFactura->setFechaCreacion($rs['FechaCreacion']);
+                        $pagoParcialFactura->nuevoRegistro(true);
+                    }
+
+                    //$factura->verificarFacturasDobles($factAbra->getRFCReceptor(), substr($factAbra->getPeriodoFacturacion(), 0, 10));
+                } else {
+                    echo "Error: no se pudo insertar la $tipo CFDI en la base de datos, pero sí se timbró ante el SAT<br/>";
+                }
+                echo "La $tipo <a href='principal.php?mnu=facturacion&action=ReporteFacturacion_net&id=" . $factura->getFolio() . "' target='_blank'>" . $factura->getFolio() . "</a> se timbró exitosamente";
+            } else {
+                echo "<br/>La $tipo " . $factura->getFolio() . " no se pudo timbrar<br/> Error: " . $soap_timbrado['return']['status'];
+            }
+        }
+    } else {
+        echo "Verifique que el folio exista";
+    }
+
+    if ($timbrado) {
+        $factura->marcarFolioTimbrado();
+    } else {
+        if (!$factura->nuevoFolioNoTimbrado()) {
+            echo "<br/>Atención: el folio no se pudo poner como pendiente, es importante reportarlo al adminsitrador del sistema";
+        }
+    }
+} else {
+    echo "No se recibió el folio";
+}
+//Aqui regresa la bandera a disponible
+if(!$bandera->liberarProcesoTimbreado())
+     echo"<br>No se borro correctamente los registros";   
+
+?>
