@@ -1,0 +1,59 @@
+<?php
+
+header('Content-Type: text/html; charset=utf-8');
+
+require_once "../lib/nusoap.php";
+include_once("../WEB-INF/Classes/Session.class.php");
+include_once("../WEB-INF/Classes/Catalogo.class.php");
+
+function obtenerProveedores($IdSession, $Estado, $Pagina) {
+    $empresa = 1;
+    $session = new Session();
+    $session->setEmpresa($empresa);
+    
+    return json_encode($session->logginWithSession($IdSession));
+    $resultadoLoggin = (int)$session->logginWithSession($IdSession);
+    
+    if ($resultadoLoggin > 0) {
+        $catalogo = new Catalogo();
+        $catalogo->setEmpresa($empresa);
+        $arrayProveedor = array();
+        $registros_por_pagina = 10;
+        $where = "";
+        $i = 0;
+        
+        if((int)$Estado == 1){
+            $where = "AND oc.Estatus NOT IN(70,59,16)";
+        }
+        $indice = $registros_por_pagina * ($Pagina-1);
+        
+        $consulta = "SELECT p.* FROM c_proveedor AS p 
+            LEFT JOIN c_orden_compra AS oc 
+            WHERE p.Activo = 1 $where 
+            LIMIT $indice,$registros_por_pagina";
+        $result = $catalogo->obtenerLista($consulta);
+        while($rs = mysql_fetch_array($result)){
+            array_push($arrayProveedor, array("idTipo" => $rs['IdTipoProveedor'],"nombre" => $rs['NombreComercial']));
+        }
+        return json_encode(array_values($calificaciones));
+    }else{
+        return json_encode($resultadoLoggin);
+    }
+}
+
+$server = new soap_server();
+$server->configureWSDL("proveedores", "urn:proveedores"); 
+$server->register("obtenerProveedores",
+    array("IdSession" => "xsd:string", "Estado" => "xsd:int", "Pagina" => "xsd:int"),
+    array("return" => "xsd:string"),
+    "urn:proveedores",
+    "urn:proveedores#obtenerProveedores",
+    "rpc",
+    "encoded",
+    "Obtiene todos los proveedores y sus tipos, activos en el sistema.");
+ 
+$server->service($HTTP_RAW_POST_DATA);
+
+
+?>
+
