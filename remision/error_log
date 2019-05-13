@@ -1,0 +1,8 @@
+[22-Apr-2019 15:09:11 America/Chicago] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, string given in /home/omiguel/public_html/remision/lista_busqueda_remisiones_pakal.php on line 207
+[22-Apr-2019 15:13:38 America/Chicago] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, string given in /home/omiguel/public_html/remision/lista_busqueda_remisiones_pakal.php on line 202
+[22-Apr-2019 15:23:13 America/Chicago] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, string given in /home/omiguel/public_html/remision/lista_busqueda_remisiones_pakal.php on line 202
+[22-Apr-2019 15:28:00 America/Chicago] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, string given in /home/omiguel/public_html/remision/lista_busqueda_remisiones_pakal.php on line 207
+[22-Apr-2019 15:46:59 America/Chicago] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, string given in /home/omiguel/public_html/remision/lista_busqueda_remisiones_pakal.php on line 207
+[22-Apr-2019 15:51:55 America/Chicago] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, string given in /home/omiguel/public_html/remision/lista_busqueda_remisiones_pakal.php on line 205
+[22-Apr-2019 15:55:35 America/Chicago] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, string given in /home/omiguel/public_html/remision/lista_busqueda_remisiones_pakal.php on line 205
+[23-Apr-2019 08:27:21 America/Chicago] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, string given in /home/omiguel/public_html/remision/lista_busqueda_remisiones_pakal.php on line 205
