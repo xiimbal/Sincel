@@ -1,0 +1,1 @@
+[26-Mar-2019 11:06:06 America/Chicago] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, string given in /home/omiguel/public_html/hardware/mis_tickets_hw.php on line 539
