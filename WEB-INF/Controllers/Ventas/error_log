@@ -1,0 +1,3 @@
+[02-May-2019 14:04:49 America/Chicago] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, string given in /home/omiguel/public_html/WEB-INF/Controllers/Ventas/Controller_json_lecturas.php on line 222
+[02-May-2019 14:04:59 America/Chicago] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, string given in /home/omiguel/public_html/WEB-INF/Controllers/Ventas/Controller_json_movimientos.php on line 409
+[02-May-2019 14:23:29 America/Chicago] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, string given in /home/omiguel/public_html/WEB-INF/Controllers/Ventas/Controller_json_lecturas.php on line 222
