@@ -1,0 +1,1 @@
+[01-May-2019 10:59:37 America/Chicago] PHP Warning:  mysql_fetch_array() expects parameter 1 to be resource, string given in /home/omiguel/public_html/WEB-INF/Controllers/Ajax/CargaSelect.php on line 485
