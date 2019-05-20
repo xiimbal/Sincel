@@ -1,0 +1,31 @@
+map-canvas {
+    height: 100%;
+    margin: 0px;
+    padding: 0px
+}
+
+#panel {
+    position: absolute;
+    top: 5px;
+    left: 50%;
+    margin-left: -180px;
+    z-index: 5;
+    background-color: #fff;
+    padding: 5px;
+    border: 1px solid #999;
+}
+
+coordenadas{
+    width: 60%;
+    position: relative;
+}
+
+.textTitulo{
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+tr.spaceUnder > td{
+    padding-bottom: 2em;
+}

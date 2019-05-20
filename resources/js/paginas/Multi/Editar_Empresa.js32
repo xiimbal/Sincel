@@ -1,0 +1,119 @@
+var direccion = "Multi/list_empresas.php";
+$(document).ready(function() {
+    var form = "#formcliente";
+    var controlador = "WEB-INF/Controllers/Multi/Controller_Empresa.php";
+    $(".boton").button();/*Estilo de botones*/
+    jQuery.validator.addMethod("imagen_seleccion", function(value, element) {
+        if ($("#imagen_existe").length && $("#imagen_existe").val() == 1) {
+            return true;
+        } else {
+            if ($("#logo").val() != "") {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }, '* Selecciona el logo');
+
+    $(form).validate({
+        errorClass: "my-error-class",
+        rules: {
+            RazonSocial: {required: true},
+            TipoDomicilioF: {required: true},
+            CalleF: {required: true},
+            NoExteriorF: {required: true, number: true},
+            NoInteriorF: {number: true},
+            ColoniaF: {required: true},
+            CiudadF: {required: true},
+            EstadoF: {required: true},
+            DelegacionF: {required: true},
+            CPF: {required: true, number: true},
+            RFCD: {required: true},
+            cfdi: {required: true},
+            pac: {required: true},
+            regimenfiscal: {required: true},
+            logo: {imagen_seleccion: true, accept: "jpg,png,jpeg"}
+        },
+        messages: {
+            RazonSocial: {required: " * Ingrese la razón social"},
+            TipoDomicilioF: {required: " * Seleccione el tipo de domicilio"},
+            CalleF: {required: " *  Ingrese la calle"},
+            NoExteriorF: {required: " *  Ingrese el No Exterior", number: " * Ingrese un número"},
+            NoInteriorF: {number: " * Ingrese un número"},
+            ColoniaF: {required: " *  Ingrese la colonia"},
+            CiudadF: {required: " * Ingrese la ciudad"},
+            EstadoF: {required: " *  Ingrese el Estado"},
+            DelegacionF: {required: " * Ingrese la delecgación o municipio"},
+            CPF: {required: " * Ingrese el Código Postal", number: " * Ingrese un número"},
+            RFCD: {required: " * Ingrese el RFC"},
+            cfdi: {required: " * Seleccione el CFDI"},
+            pac: {required: " * Seleccione el PAC"},
+            regimenfiscal: {required: " * Ingrese el régimen fiscal"},
+            logo: {imagen_seleccion: " * Selecciona el logo", accept: " * Selecciona una imagen"}
+        }
+    });
+
+    /*Prevent form*/
+    $(form).submit(function(event) {
+        if ($(form).valid()) {
+            /* stop form from submitting normally */
+            event.preventDefault();
+            /*Serialize and post the form*/
+            var inputs = $("input[type=file]"),
+                    files = [];
+            for (var i = 0; i < inputs.length; i++) {
+                files.push(inputs.eq(i).prop("files")[0]);
+            }
+
+            var formData = new FormData();
+            $.each(files, function(key, value)
+            {
+                formData.append(key, value);
+            });
+            formData.append('form', $(form).serialize());
+            $.ajax({
+                url: controlador,
+                type: 'POST',
+                data: formData,
+                cache: false,
+                contentType: false,
+                processData: false,
+                success: function(data, textStatus, jqXHR)
+                {
+                    if (data.toString().indexOf("Error:") === -1) {/*En caso de que no hay error*/
+                        cambiarContenidos(direccion, "Empresas");
+                        $('#mensajes').html(data);
+                    } else {
+                        $('#mensajes').html(data);
+                    }
+                    finished();
+                },
+                error: function(jqXHR, textStatus, errorThrown)
+                {
+                },
+                complete: function()
+                {
+                }
+            });
+            loading("Enviando...");
+            $("#divinfo").empty();
+        }
+    });        
+
+    $('#logo').fileValidator({
+        onValidation: function(files) {            
+            $(".error_file").text("");
+            $(this).attr('class', '');
+        },
+        onInvalid: function(type, file) {                    
+            $(".error_file").text("Debes de elegir una imagen menor de 25kb");
+            var control = $("#logo");
+            control.replaceWith( control = control.clone( true ) );            
+            $(this).addClass('invalid ' + type);
+            return false;
+        },
+        maxSize: '25kb',
+        type: 'image'
+    });
+});
+

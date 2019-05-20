@@ -1,0 +1,548 @@
+$(document).ready(function() {
+    var form = "#formEquipo";
+    var controlador = "WEB-INF/Controllers/Controler_Equipo.php?regresar=1";
+    var paginaExito = "admin/alta_equipo.php";
+    var paginaLista = "admin/lista_equipos.php";
+    jQuery.validator.addMethod('selectcheck', function(value) {
+        return (value != '');
+    }, " * Selecciona un elemento de la lista");
+
+    $.validator.addMethod('filesize', function(value, element, param) {
+        return this.optional(element) || (element.files[0].size <= param)
+    });
+    $.validator.addMethod("validarForm", function(value, element) {
+        if ($("#caracteristica").val() != "Formato amplio") {
+            if ($("input[name=formato1]:checked").val()) {
+                return true;
+            } else {
+                return false;
+            }
+
+        } else {
+            return true;
+        }
+    }, "* Seleccione el formato del equipo");
+
+    $.validator.addMethod("validartipoServ", function(value, element) {
+        if ($("#caracteristica").val() == "Formato amplio") {
+            if ($("input[name=color]:checked").val()) {
+                return true;
+            } else {
+                return false;
+            }
+
+        } else {
+            return true;
+        }
+    }, "* Seleccione el tipo de servicio");
+
+    $.validator.addMethod("validarServicio", function(value, element) {
+        if ($("#caracteristica").val() != "Formato amplio") {
+            if ($("input[name=color]:checked").val() || $("input[name=fax]:checked").val()) {
+                return true;
+            } else {
+                return false;
+            }
+
+        } else {
+            return true;
+        }
+    }, "* Seleccione el tipo de servicio");
+
+
+    $(form).validate({
+        errorClass: "my-error-class",
+        rules: {
+            // orden: {required: true, maxlength: 10, minlength: 4},
+            partes: {required: true, maxlength: 50, minlength: 4},
+            modelo: {required: true, maxlength: 50, minlength: 4},
+            descripcion: {required: true, maxlength: 2000, minlength: 4},
+            precio: {/*required: true,*/ number: true},
+            periodoMeses: {required: true, number: true},
+            periodoImpresion: {required: true, number: true},
+            caracteristica: {selectcheck: true},
+            ciclo: {required: true, number: true},
+            imagen: {filesize: 1048576, accept: "png|jpe?g"},
+            prefijo: {maxlength: 4},
+            longitud_serie: {number:true, maxlength: 4},
+            // formato: {required: true},
+            peso: {number: true},
+            listaPartes: {accept: "pdf"},
+            giaOperacion: {accept: "pdf"},
+            guiaOpAvanzada: {accept: "pdf"},
+            manualServicio: {accept: "pdf"},
+            EspecificacionTec: {accept: "pdf"},
+            formato1: {"validarForm": true},
+            color: {"validartipoServ": true},
+            tiposerv: {"required": true}
+            // fax: {"validarServicio": true}
+            //color:{"validarServicio": true}
+        },
+        messages: {
+            partes: {required: " * Ingrese el n\u00famero de parte", minlength: " * Escribe m\u00ednimo {0} caracteres", maxlength: " * Escribe m\u00e1ximo {0} caracteres"},
+            modelo: {required: " * Ingrese el modelo", minlength: " * Escribe m\u00ednimo {0} caracteres", maxlength: " * Escribe m\u00e1ximo {0} caracteres"},
+            descripcion: {required: " * Ingrese una descripcion", minlength: " * Escribe m\u00ednimo {0} caracteres", maxlength: " * Escribe m\u00e1ximo {0} caracteres"},
+            precio: {required: " * Ingrese el precio", number: " * Ingresa s\u00f3lo n\u00fameros"},
+            periodoImpresion: {required: " * Ingrese el periodo de grantia(impresion)", number: " * Ingresa s\u00f3lo n\u00fameros"},
+            periodoMeses: {required: " * Ingrese el periodo de grarantia(meses)", number: " * Ingresa s\u00f3lo n\u00fameros"},
+            ciclo: {required: " * Ingrese el ciclo m\u00e1ximo mensusal", number: " * Ingresa s\u00f3lo n\u00fameros"},
+            prefijo: {maxlength: " * Escribe m\u00e1ximo {0} caracteres"},
+            longitud_serie: {number:" * Ingresa s\u00f3lo n\u00fameros", maxlength:  " * Escribe m\u00e1ximo {0} caracteres"},
+            peso: {number: "* Ingresa s\u00f3lo n\u00fameros"},
+            imagen: "El archivo pedimento debe ser JPG o PNG y pesar menos de un mega 1MB",
+            formato: {required: " * Selecciona el formato de equipo"},
+//            color: {required: " * Selecciona el tipo de servicio"},
+            listaPartes: "El archivo pedimento debe ser PDF",
+            giaOperacion: "El archivo pedimento debe ser PDF",
+            guiaOpAvanzada: "El archivo pedimento debe ser PDF",
+            manualServicio: "El archivo pedimento debe ser PDF",
+            EspecificacionTec: "El archivo pedimento debe ser PDF",
+            tiposerv: {required: " * Selecciona el tipo de servicio"}
+        }
+    });
+
+    /*Prevent form*/
+    $(form).submit(function(event) {
+        if ($(form).valid()) {
+            /* stop form from submitting normally */
+            event.preventDefault();
+            //alert(">>" + nombre1 + ">>" + nombre2 + ">>" + nombre3 + ">>" + nombre4 + ">>" + nombre5);
+            /*Serialize and post the form*/
+            $.post(controlador, {form: $(form).serialize()}).done(function(data) {                
+                if (data.toString().indexOf("Error:") === -1) {/*En caso de que no hay error*/
+                    loading("Subiendo Archivos...");
+                    subirImagen(data);
+                    comprobar(paginaExito, data, paginaLista);//                   
+                } else {
+                    $('#mensajes').html(data);
+                    finished();
+                }
+            });
+        }
+    });
+    $('.boton').button().css('margin-top', '20px');
+    $("#componenteCopiar").multiselect({
+        multiple: false,
+        noneSelectedText: "No ha seleccionado",
+        selectedList: 1
+    }).multiselectfilter({
+        label: 'Filtro',
+        placeholder: 'Escribe el filtro'
+    });
+});
+
+function comprobar(paginaExito, data, paginaLista){
+    var interval = setInterval(function() {
+        if (numerador == 6) {
+            window.clearInterval(interval);
+            editarRegistroEquipo(paginaExito, data);
+            if (!$("#activo").is(':checked')) {
+                cargarPyS(paginaLista);
+                finished();
+            }
+        }
+    }, 2000);
+}
+var numerador = 0;
+
+function subirImagen(idFolio){
+    var intp = $("#imagen").val();
+    if (intp !== "") {
+        var formData = new FormData($(".formulario")[0]);
+        formData.append("tipo", "0");
+        formData.append("folio", idFolio);
+        $.ajax({
+            url: 'WEB-INF/Controllers/Controler_UploadPruebas.php',
+            type: 'POST',
+            data: formData,
+            cache: false,
+            contentType: false,
+            processData: false,
+            beforeSend: function() {
+                $("#arch0").text("cargando imagen...");
+            },
+            //una vez finalizado correctamente
+            success: function(data) {
+                var $fileupload = $('#imagen');
+                $fileupload.replaceWith($fileupload.clone(true));
+                $("#arch0").html("<img src='WEB-INF/Controllers/documentos/equipos/" + data + "' id='preview' name='preview' style='max-width: 200px; max-height: 150px;'/>");
+                //$("#arch1").html("<a href='WEB-INF/Controllers/documentos/equipos/" + data + "' target='_blank'>" + data + "</a>");
+                numerador++;
+                subirArchivo1(idFolio);
+            },
+            error: function() {
+                $("#arch0").text("Error 1");
+            }
+        });
+    }
+    else
+    {
+        numerador++;
+        subirArchivo1(idFolio);
+    }
+}
+function subirArchivo1(idFolio)
+{
+    var intp = $("#listaPartes").val();
+    if (intp !== "") {
+        var formData = new FormData($(".formulario")[0]);
+        formData.append("tipo", "1");
+        formData.append("folio", idFolio);
+        $.ajax({
+            url: 'WEB-INF/Controllers/Controler_UploadPruebas.php',
+            type: 'POST',
+            data: formData,
+            cache: false,
+            contentType: false,
+            processData: false,
+            beforeSend: function() {
+                $("#arch1").text("Subiendo lista de partes...");
+            },
+            //una vez finalizado correctamente
+            success: function(data) {
+                var $fileupload = $('#listaPartes');
+                $fileupload.replaceWith($fileupload.clone(true));
+                $("#arch1").html("<a href='WEB-INF/Controllers/documentos/equipos/" + data + "' target='_blank'>" + data + "</a>");
+                numerador++;
+                subirArchivo2(idFolio);
+            },
+            error: function() {
+                $("#arch1").text("Error 1");
+            }
+        });
+    } else {
+        numerador++;
+        subirArchivo2(idFolio);
+    }
+//    Warning: POST Content-Length of 136884050 bytes exceeds the limit of 134217728 bytes in Unknown on line 0
+}
+function subirArchivo2(idFolio)
+{
+    var intp1 = $("#giaOperacion").val();
+    if (intp1 !== "") {
+        var formData = new FormData($(".formulario")[0]);
+        formData.append("tipo", "2");
+        formData.append("folio", idFolio);
+        $.ajax({
+            url: 'WEB-INF/Controllers/Controler_UploadPruebas.php',
+            type: 'POST',
+            data: formData,
+            cache: false,
+            contentType: false,
+            processData: false,
+            beforeSend: function() {
+                $("#arch2").text("Subiendo guia de operaciones ...");
+            },
+            //una vez finalizado correctamente
+            success: function(data) {
+                var $fileupload = $('#giaOperacion');
+                $fileupload.replaceWith($fileupload.clone(true));
+                $("#arch2").html("<a href='WEB-INF/Controllers/documentos/equipos/" + data + "' target='_blank'>" + data + "</a>");
+                numerador++;
+                subirArchivo3(idFolio);
+            },
+            error: function() {
+                $("#arch2").text("Error 2");
+            }
+        });
+    } else {
+        numerador++;
+        subirArchivo3(idFolio);
+    }
+}
+function subirArchivo3(idFolio)
+{
+    var intp3 = $("#guiaOpAvanzada").val();
+    if (intp3 !== "") {
+        var formData = new FormData($(".formulario")[0]);
+        formData.append("tipo", "3");
+        formData.append("folio", idFolio);
+        $.ajax({
+            url: 'WEB-INF/Controllers/Controler_UploadPruebas.php',
+            type: 'POST',
+            data: formData,
+            cache: false,
+            contentType: false,
+            processData: false,
+            beforeSend: function() {
+                $("#arch3").text("Subiendo guia de operaciones avanzadas...");
+            },
+            //una vez finalizado correctamente
+            success: function(data) {
+                var $fileupload = $('#guiaOpAvanzada');
+                $fileupload.replaceWith($fileupload.clone(true));
+                $("#arch3").html("<a href='WEB-INF/Controllers/documentos/equipos/" + data + "' target='_blank'>" + data + "</a>");
+                numerador++;
+                subirArchivo4(idFolio);
+            },
+            error: function() {
+                $("#arch3").text("Error 3");
+            }
+        });
+    } else {
+        numerador++;
+        subirArchivo4(idFolio);
+    }
+
+}
+function subirArchivo4(idFolio)
+{
+    var intp3 = $("#manualServicio").val();
+    if (intp3 !== "") {
+        var formData = new FormData($(".formulario")[0]);
+        formData.append("tipo", "4");
+        formData.append("folio", idFolio);
+        $.ajax({
+            url: 'WEB-INF/Controllers/Controler_UploadPruebas.php',
+            type: 'POST',
+            data: formData,
+            cache: false,
+            contentType: false,
+            processData: false,
+            beforeSend: function() {
+                $("#arch4").text("Subiendo manual de servício...");
+            },
+            //una vez finalizado correctamente
+            success: function(data) {
+                var $fileupload = $('#manualServicio');
+                $fileupload.replaceWith($fileupload.clone(true));
+                $("#arch4").html("<a href='WEB-INF/Controllers/documentos/equipos/" + data + "' target='_blank'>" + data + "</a>");
+                numerador++;
+                subirArchivo5(idFolio);
+            },
+            error: function() {
+                $("#arch4").text("Error 4");
+            }
+        });
+    } else {
+        numerador++;
+        subirArchivo5(idFolio);
+    }
+}
+function subirArchivo5(idFolio)
+{
+    var intp3 = $("#EspecificacionTec").val();
+    if (intp3 !== "") {
+        var formData = new FormData($(".formulario")[0]);
+        formData.append("tipo", "5");
+        formData.append("folio", idFolio);
+        $.ajax({
+            url: 'WEB-INF/Controllers/Controler_UploadPruebas.php',
+            type: 'POST',
+            data: formData,
+            cache: false,
+            contentType: false,
+            processData: false,
+            beforeSend: function() {
+                $("#arch5").text("Subiendo especificaciones técnicas...");
+            },
+            //una vez finalizado correctamente
+            success: function(data) {
+                var $fileupload = $('#EspecificacionTec');
+                $fileupload.replaceWith($fileupload.clone(true));
+                $("#arch5").html("<a href='WEB-INF/Controllers/documentos/equipos/" + data + "' target='_blank'>" + data + "</a>");
+                numerador++;
+            },
+            error: function() {
+                $("#arch5").text("Error 5");
+            }
+        });
+    } else {
+        numerador++;
+    }
+}
+//function uploadFile(idFolio) {
+//    var inputFileImage = document.getElementById("imagen");
+//    var file = inputFileImage.files[0];
+//    var data = new FormData();
+//    data.append("archivo", file);
+//    data.append("folio", idFolio);
+//    data.append("tipo", "equipo");
+//    var url = "WEB-INF/Controllers/Controler_uploadFile.php";
+//    $.ajax({
+//        url: url,
+//        type: "POST",
+//        contentType: false,
+//        data: data,
+//        processData: false,
+//        cache: false
+//    }).done(function(data) {
+//        /*if (data !== "") {
+//         $("#mensaje").text(JSON.stringify(data));
+//         
+//         }   */
+//    });
+//    var lista = document.getElementById("listaPartes");
+//    var file = lista.files[0];
+//    var data = new FormData();
+//    data.append("archivo", file);
+//    data.append("folio", idFolio);
+//    data.append("tipo", "equipoLista");
+//    var url = "WEB-INF/Controllers/Controler_uploadFile.php";
+//    $.ajax({
+//        url: url,
+//        type: "POST",
+//        contentType: false,
+//        data: data,
+//        processData: false,
+//        cache: false
+//    }).done(function(data) {
+//        //alert(data);
+//        /*if (data !== "") {
+//         $("#mensaje").text(JSON.stringify(data));
+//         
+//         }   */
+//    });
+//
+//    //2
+//    var guia = document.getElementById("giaOperacion");
+//    var file = guia.files[0];
+//    var data = new FormData();
+//    data.append("archivo", file);
+//    data.append("folio", idFolio);
+//    data.append("tipo", "equipoGuia");
+//    var url = "WEB-INF/Controllers/Controler_uploadFile.php";
+//    $.ajax({
+//        url: url,
+//        type: "POST",
+//        contentType: false,
+//        data: data,
+//        processData: false,
+//        cache: false
+//    }).done(function(data) {
+//        //alert(data);
+//        /*if (data !== "") {
+//         $("#mensaje").text(JSON.stringify(data));
+//         
+//         }   */
+//    });
+//    //3
+//    var opAvanz = document.getElementById("guiaOpAvanzada");
+//    var file = opAvanz.files[0];
+//    var data = new FormData();
+//    data.append("archivo", file);
+//    data.append("folio", idFolio);
+//    data.append("tipo", "equipoOpAvan");
+//    var url = "WEB-INF/Controllers/Controler_uploadFile.php";
+//    $.ajax({
+//        url: url,
+//        type: "POST",
+//        contentType: false,
+//        data: data,
+//        processData: false,
+//        cache: false
+//    }).done(function(data) {
+//        //alert(data);
+//        /*if (data !== "") {
+//         $("#mensaje").text(JSON.stringify(data));
+//         
+//         }   */
+//    });
+//    //4
+//    var manual = document.getElementById("manualServicio");
+//    var file = manual.files[0];
+//    var data = new FormData();
+//    data.append("archivo", file);
+//    data.append("folio", idFolio);
+//    data.append("tipo", "equipoManual");
+//    var url = "WEB-INF/Controllers/Controler_uploadFile.php";
+//    $.ajax({
+//        url: url,
+//        type: "POST",
+//        contentType: false,
+//        data: data,
+//        processData: false,
+//        cache: false
+//    }).done(function(data) {
+//        //alert(data);
+//        /*if (data !== "") {
+//         $("#mensaje").text(JSON.stringify(data));
+//         
+//         }   */
+//    });
+//    //5
+//    var especific = document.getElementById("EspecificacionTec");
+//    var file = especific.files[0];
+//    var data = new FormData();
+//    data.append("archivo", file);
+//    data.append("folio", idFolio);
+//    data.append("tipo", "equipoEspec");
+//    var url = "WEB-INF/Controllers/Controler_uploadFile.php";
+//    $.ajax({
+//        url: url,
+//        type: "POST",
+//        contentType: false,
+//        data: data,
+//        processData: false,
+//        cache: false
+//    }).done(function(data) {
+//        //alert(data);
+//        /*if (data !== "") {
+//         $("#mensaje").text(JSON.stringify(data));
+//         
+//         }   */
+//    });
+//
+//
+//}
+function altaDetalle(pagina, div, id)
+{
+    $("#" + div).load(pagina, {"idEqipo": id}, function() {
+        finished();
+    });
+}
+
+function editarDetalle(pagina, div, id, id2)
+{
+    loading("Cargando ...");
+    limpiarMensaje();
+    $("#" + div).load(pagina, {"idEqipo": id, "id2": id2}, function() {
+        finished();
+    });
+}
+function regresarListaEq(liga, div, titulo) {
+    loading("Cargando ...");
+    limpiarMensaje();
+    $('#' + div).load(liga, {"idEquipo": $("#idE").val()}, function() {
+        $('#titulo').text(titulo);
+        $(".tabs").tabs();
+        $(".button").button();
+        finished();
+    });
+}
+function eliminraRegDetalle(controlador, div, id, lista)
+{
+    if (confirm("¿Esta seguro que desea eliminar este registro?")) {
+        $('#mensajes').load(controlador, function() {
+            $('#' + div).load(lista, {"idEquipo": id});
+        });
+    }
+}
+function dealleComponentes(pagina, div, id, idEquipo, lista)
+{
+    $("#" + div).load(pagina, {"id": id, "detalleC": "detalle", "idEquipo": idEquipo, "lista": lista, "div": div}, function() {
+        finished();
+    });
+}
+
+function OcultarCampos()
+{
+    var id = $("#caracteristica").val();
+    id = id.toLowerCase();
+    if (id === "formato amplio")
+    {
+        $("#ocFax").hide();
+        $("#formato").hide();
+    }
+    else
+    {
+        $("#ocFax").show();
+        $("#formato").show();
+    }
+}
+function altaDetalleComponente(pagina, div, id, tipo)
+{
+    $("#" + div).load(pagina, {"idComponente": id, "tipo": tipo}, function() {
+        finished();
+    });
+}

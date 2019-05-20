@@ -1,0 +1,168 @@
+
+$(document).ready(function() {
+    var form = "#formcliente";
+    var controlador = "WEB-INF/Controllers/Ventas/Controller_Nuevo_Cliente.php";
+    var direccion = $("#regresar").val();
+    
+    $.validator.addMethod(
+            "regex",
+            function(value, element, regexp) {
+                var re = new RegExp(regexp);
+                return this.optional(element) || re.test(value);
+            },
+            "Por favor, valida que sea un RFC válido (no se permiten espacios ni guiones)"
+    );
+    
+    $(".boton").button();/*Estilo de botones*/
+    $(form).validate({
+        errorClass: "my-error-class",
+        rules: {
+            EstatusCobranza: {required: true},
+            RazonSocial: {required: true},
+            ejecutivocuenta: {required: true},
+            zona: {required:true},
+            TipoCliente: {required: true},
+            Giro: {required: true},
+            razon_cliente2: {required: true},
+            TipoDomicilioF: {required: true},
+            CalleF: {required: true},
+            NoExteriorF: {required: true},
+            ColoniaF: {required: true},
+            CiudadF: {required: true},
+            EstadoF: {required: true},
+            DelegacionF: {required: true},
+            CPF: {required: true, number:true},
+            RFCD: {required: true},
+            latitud: {number: true, maxlength: 12},
+            longitud: {number: true, maxlength: 12}
+        },
+        messages: {
+            EstatusCobranza: {required: " * Seleccione el estatus"},
+            ejecutivocuenta: {required: " * Seleccione el vendedor"},
+            zona: {required:" * Seleccione la zona"},
+            RazonSocial: {required: " * Ingrese el nombre del cliente"},
+            TipoCliente: {required: " * Seleccione el tipo de cliente"},
+            Giro: {required: " * Seleccione el giro de la empresa"},
+            razon_cliente2: {required: " * Seleccione la razón social"},
+            TipoDomicilioF: {required: " * Seleccione el tipo de domicilio"},
+            CalleF: {required: " *  Ingrese la calle"},
+            NoExteriorF: {required: " *  Ingrese el No Exterior"},
+            ColoniaF: {required: " *  Ingrese la colonia"},
+            CiudadF: {required: " * Ingrese la ciudad"},
+            EstadoF: {required: " *  Ingrese el Estado"},
+            DelegacionF: {required: " * Ingrese la delecgación o municipio"},
+            CPF: {required: " * Ingrese el Código Postal",number: " * Ingrese un número"},
+            RFCD: {required: " * Ingrese el RFC"},
+            latitud: {number: " * Ingrese un número", maxlength: " * Ingrese un máximo de {0} números"},
+            longitud: {number: " * Ingrese un número", maxlength: " * Ingrese un máximo de {0} números"}
+        }
+    });
+    
+    $("#RFCD").rules("add", { regex: /^([A-Za-zÑ\x26]{3,4}([0-9]{2})(0[1-9]|1[0-2])(0[1-9]|1[0-9]|2[0-9]|3[0-1]))([A-Za-z\d]{3})$/ });
+
+    /*Prevent form*/
+    $(form).submit(function(event) {
+        if ($(form).valid()) {
+            /* stop form from submitting normally */
+            event.preventDefault();
+            /*Serialize and post the form*/
+            $.post(controlador, {form: $(form).serialize()}).done(function(data) {
+                 if (data.toString().indexOf("Error:") === -1) {/*En caso de que no hay error*/   
+                    cambiarContenidos(direccion, "Mis Clientes");
+                    $('#mensajes').html(data);
+                } else {
+                    $('#mensajes').html(data);
+                }
+                finished();
+            });
+            loading("Enviando...");
+            $("#divinfo").empty();
+        }
+    });
+    mostrarDatosDeVentas();
+    
+});
+
+function mostrarDatosDeVentas(){
+    if($("#modalidad2").val() == "3"){
+        $(".venta").show();
+        $("#forma_pago").rules('add', {
+            required: true,            
+            messages: {
+                required: " * Selecciona la forma de pago"
+            }
+        });
+        $("#metodo_pago").rules('add', {
+            required: true,            
+            messages: {
+                required: " * Selecciona el método de pago"
+            }
+        });  
+        $("#usoCFDI").rules('add', {
+            required: true,            
+            messages: {
+                required: " * Selecciona el método de pago"
+            }
+        });  
+        
+        $("#dias_credito").rules('add', {
+            required: true,
+            number: true,
+            min:0,
+            messages: {
+                required: " * Ingrese los días de crédito", number: " * Ingresa sólo número", min: "Sólo ingres números positivos"
+            }
+        });
+    }else{
+        $("#metodo_pago").rules("remove");
+        $("#forma_pago").rules("remove");
+        $("#usoCFDI").rules("remove");
+        $(".venta").hide();
+    }
+}
+
+function agregarCategoria() {
+    var numero = $("#numero_categoria").val();
+    numero++;
+
+    $("#t_datos_categorias").append("<tr id='row_" + numero + "'>" +
+            "<td>Categoria</td>" +
+            "<td><select id='categoria"+numero+"' name='categoria"+numero+"'></select></td>" +
+            "<td><input type=\"image\" src=\"resources/images/add.png\" title=\"Agregar otra categoría\" onclick=\"agregarCategoria(); return false;\" /></td>" +
+            "<td><input type='image' id='erase"+numero+"' src='resources/images/Erase.png' title='Eliminar este periodo' onclick='borrarCategoria(" + numero + "); return false;'/></td>" +
+            "</td></tr>");   
+    /*Copiamos los tipos de componentes*/
+    var $options = $("#categoria1 > option").clone();
+    $('#categoria' + numero).append($options);
+    
+    $("#numero_categoria").val(numero);
+}
+
+function borrarCategoria(fila) {            
+    var trs = $("#t_datos_categorias tr").length;
+    var contador = $("#numero_categoria").val();            
+    if(fila > contador){
+        fila = contador;        
+    }
+    var row = 'row_' + fila;
+    if (trs > 1) {//Si hay filas en la tabla        
+        $("#" + row).remove();
+        //$("#" + row).rules("remove");
+        for (var i = (fila + 1); i <= contador; i++) {
+            if ($("#categoria" + i).length) {
+                $('#categoria' + i).attr('id', function() {
+                    return 'categoria' + (i - 1);  // change id
+                }).attr('name', function() {
+                    return 'categoria' + (i - 1);  // change name
+                });
+            }                                    
+
+            if ($("#row_" + i).length) {
+                $('#row_' + i).attr('id', function() {
+                    return 'row_' + (i - 1);  // change id
+                });
+            }
+        }
+        $("#numero_categoria").val(contador - 1);
+    }
+}

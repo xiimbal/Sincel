@@ -1,0 +1,9 @@
+/* 
+    Document   : docking
+    Created on : 18/10/2012, 11:37:58 AM
+    Author     : MAGG
+    Description:
+        Purpose of the stylesheet follows.
+*/
+.jqx-widget-header-shinyblack{color: #FFF; border-color:#AF4B4B; background-color: #2B2B2B}
+.jqx-window-close-button-shinyblack, .icon-close-shinyblack, .jqx-tabs-close-button-shinyblack, .jqx-tabs-close-button-hover-shinyblack, .jqx-tabs-close-button-selected-shinyblack{background-image:url(images/close_white.png);  background-repeat:no-repeat;  background-position:center; visibility: hidden}

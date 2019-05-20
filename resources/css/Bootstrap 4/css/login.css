@@ -1,0 +1,157 @@
+                                                            /*------------------------------------ 
+                                                                ESTILOS PARA EL INDEX O LOGIN
+                                                            ------------------------------------*/
+
+/* ----------------------------- 
+    ESTILOS GENERALES                                                                
+ -----------------------------*/
+:root {
+    --primary-bg-color: #142735;    
+    --secondary-bg-color: #6D8091;
+    --third-bg-color: #122533;
+}
+
+html body{
+
+    display: flex;    
+    align-items: center;
+    width: 100%;
+    height: 100vh;
+    /* background-color: #E1DCE9; */
+    /* background-color: rgb(73, 12, 172); */
+}
+
+.contenedor-principal{        
+    width: 90%;
+    height: auto;
+    margin: auto;
+    padding: 15px;
+    background-color: #ffffff;
+    border-radius: 8px; 
+    -webkit-box-shadow: 9px 12px 37px 5px rgba(0,0,0,0.47);
+    -moz-box-shadow: 9px 12px 37px 5px rgba(0,0,0,0.47);
+    box-shadow: 9px 12px 37px 5px rgba(0,0,0,0.47);
+}
+/* ----------------------------- 
+    ESTILOS GENERALES                                                                
+ -----------------------------*/
+
+
+
+/* ------------------------------------------------
+            ESTILOS DEL FORMULARIO DE LOGIN                                                                
+ --------------------------------------------------*/
+
+/* ESTILO PARA LAS MEDIDAS DE LA IMAGEN */
+.titulo-ARA img{
+    display: block;
+    text-align: center;
+    margin: auto;
+    width: 80px;
+    height: 80px;     
+}
+
+/* ESTILO PARA EL TITULO DEL LOGIN */
+.sesion{
+    margin-top: 25px;
+    font-size: 25px;
+    letter-spacing: 2px; 
+    margin-top: 10px;
+    text-align: center;
+}
+
+.ara-span-login{
+    color: var(--secondary-bg-color);
+}
+
+a#contrasenia_olvidada{
+    font-size: 12.8px;
+    color: #6c757d;
+    text-decoration: none;
+}
+a#contrasenia_olvidada:hover{
+    cursor: hand;
+    color: #FB0900;
+}
+
+/* ------------------------------------------------ 
+    FIN DE LOS ESTILOS DEL FORMULARIO DE LOGIN                                                                
+ --------------------------------------------------*/
+
+
+                                                    /* ------------------------------------------------                                                     
+                                                            ESTILOS PARA EL CAROUSEL DE LOGIN
+                                                    --------------------------------------------------*/
+img.img-slider-login{    
+    width: 100%;
+    height: 400px;
+}
+
+#carousel-login{
+    width: 100%;
+    height: 100%;
+}
+
+ol.carousel-indicators li{
+    background: #000000;
+}
+
+ol.carousel-indicators li.active{
+    background: #adb5bb;
+}
+
+/* ESTILO PARA LOS CONTROLES DE ANTERIOR */
+span.carousel-control-prev-icon{
+    background-color: black;
+    border-radius: 5px;
+    height: 5%;
+}
+
+/* ESTILO PARA LOS CONTROLES DE SIGUIENTE */
+span.carousel-control-next-icon{
+    background-color: black;
+    border-radius: 5px;
+    height: 5%;
+}
+
+.carousel-caption{
+    background-color: #91959734;
+}
+
+.carousel-inner{
+    height: 100%;
+}
+
+                                                    /* ------------------------------------------------ 
+                                                        FIN DE LOS ESTILOS PARA EL CAROUSEL DE LOGIN                                                                
+                                                    --------------------------------------------------*/
+
+
+
+
+
+.color1{
+    background-color: #85b637;
+}
+
+.color2{
+    background-color: #2bb492;
+}
+
+.color3{
+    background-color: #377db6;
+}
+.color4{
+    background-color: #152533;
+}
+.color5{
+    background-color: #158f34;
+}
+.color6{
+    background-color: #ffffff;
+}
+
+                                                            /*------------------------------------ 
+                                                                FIN DE LOS ESTILOS PARA
+                                                                    EL INDEX O LOGIN
+                                                            ------------------------------------*/

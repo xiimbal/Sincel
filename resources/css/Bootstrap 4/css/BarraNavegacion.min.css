@@ -1,0 +1,21 @@
+#sidebar,body,html{height:100%}#sidebar{position:fixed;z-index:20;top:0;left:0;max-width:340px;overflow-y:hidden;background-image:linear-gradient(to right bottom,#0c202d,#172a38,#223543,#2e404f,#394c5b);transition:width 9s}#sidebar.active{width:0;transition:width 9s}.contenedor-principal-sidebar{height:100%;overflow:auto}.contenedor-principal-sidebar::-webkit-scrollbar{background-color:transparent;width:8px}.contenedor-principal-sidebar::-webkit-scrollbar-thumb{background-color:rgba(128,128,128,.658);border-radius:12px;height:40px}#sidebar .sidebar-header{display:flex;flex-direction:row;align-items:center;height:56px;min-height:56px;max-height:56px;width:340px;max-width:340px;padding:12px 12px 12px 20px;background:#fff;color:#000}#sidebar .sidebar-header img{width:24px;height:24px;vertical-align:sub}#sidebar .sidebar-header span{font-size:16px;font-weight:300;letter-spacing:.4px;line-height:normal}#sidebar .sidebar-header button{margin-left:200px;color:#000}.sidebar-user{min-height:136px;max-height:136px;min-width:340px;background-color:#fff;color:#050505;padding-top:24px;padding-bottom:64px}#nombre_usuario{font-size:16px}#correo_usuario{font-size:13px}#foto_usuario{top:88px;width:100px;height:100px;border-radius:50%}.sidebar-items{padding-top:50px}.titulo-menu{color:#f2f2f2;margin:0 0 0 24px;height:40px}.contenedor-item-menu a,li.sidebar-sub_item a{color:#fff;text-decoration:none}.sidebar-item-menu{width:100%;padding:0;margin:0 16px 0 0}.contenedor-item-menu{display:flex;align-items:center;height:40px;padding:0 12px 0 24px}ul.collapse.show{background-color:#172a38}li.sidebar-sub_item{display:flex;align-items:center;height:40px}li.sidebar-sub_item a{padding-left:16px}.icon-item{width:16px;height:16px;margin-right:16px}a.dropdown-toggle#nombre_usuario{color:#000}.contenedor-item-menu:active,.contenedor-item-menu:hover,li.sidebar-sub_item:hover{color:rgba(216,218,221,.753);border-radius:0 20px 20px 0}.contenedor-item-menu:hover{background:rgba(101,102,104,.336)}.contenedor-item-menu:active{background-color:rgba(4,74,212,.336)}li.sidebar-sub_item:hover{background:rgba(101,102,104,.336)}
+.color1{
+    background-color: #85b637;
+}
+
+.color2{
+    background-color: #2bb492;
+}
+
+.color3{
+    background-color: #377db6;
+}
+.color4{
+    background-color: #152533;
+}
+.color5{
+    background-color: #158f34;
+}
+.color6{
+    background-color: #b99328;
+}

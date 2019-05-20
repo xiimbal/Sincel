@@ -1,0 +1,99 @@
+var oTable;
+$(document).ready(function() {
+    var espanol = {
+        "sProcessing": "Procesando...",
+        "sLengthMenu": "Mostrar _MENU_ registros",
+        "sZeroRecords": "No se encontraron resultados",
+        "sEmptyTable": "Ning\u00fan dato disponible en esta tabla",
+        "sInfo": "Mostrando de _START_ a _END_ de  _TOTAL_ registros",
+        "sInfoEmpty": "Mostrando 0 registros",
+        "sInfoFiltered": "(filtrado de _MAX_ registros)",
+        "sInfoPostFix": "",
+        "sSearch": "Buscar:",
+        "sUrl": "",
+        "sInfoThousands": ",",
+        "sLoadingRecords": "Cargando...",
+        "oPaginate": {
+            "sFirst": "Primero",
+            "sLast": "\u00daltimo",
+            "sNext": "Siguiente",
+            "sPrevious": "Anterior"
+        },
+        "oAria": {
+            "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+            "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+        }
+    };
+    oTable = $('#tsolequipo').dataTable({
+        "bJQueryUI": true,
+        "bRetrieve": true,
+        "bDestroy": true,
+        "oLanguage": espanol,
+        "sPaginationType": "full_numbers",
+        "bDeferRender": true,
+        "iDisplayLength": 100
+        /*"sDom": '<"H"lTfr>t<"F"ip>',
+        "oTableTools": {
+            "sSwfPath": "resources/media/swf/copy_cvs_xls_pdf.swf",
+            "aButtons": [
+                {'sExtends': 'copy', 'sMessage': 'Copiar', 'sButtonText': 'Copiar', 'sButtonClass': "boton_tabla"},
+                {
+                    "sExtends": "pdf",
+                    "sFileName": "SICOP.pdf",
+                    "bSelectedOnly": true
+                }
+            ]
+        }*/
+    });
+
+
+});
+
+function eliminarfila(line, dir, id) {
+    $.post(dir,{id:id}, function(data) {
+        oTable.fnDeleteRow(line);
+    });
+
+}
+
+function surtidasycanceladas() {
+    if ($('#checksc').is(':checked')) {
+        cambiarContenidos("ventas/list_sol_equipo.php?mostrar=" + $("#checksc").val(), "Solicitudes");
+    } else {
+        cambiarContenidos("ventas/list_sol_equipo.php?mostrar=0", "Solicitudes");
+    }
+
+}
+
+/*function facturarvd(idVenta) {
+    var r = confirm('¿Deseas generar la prefactura?');
+    if (r == true) {
+        loading("Cargando ...");
+        $('#mensajes').load("ventas/PrefacturaVD.php", {vd: idVenta}, function(data) {
+            
+            finished();            
+            cambiarContenidos('ventas/list_sol_equipo.php', 'Solicitudes');
+        });
+    }
+}*/
+
+function cancelarsolicitud(id){
+    var r = confirm('¿Deseas cancelar la solicitud '+id+'?');
+    if (r == true) {
+        loading("Cargando ...");
+        $('#mensajes').load("ventas/CancelacionSeriesTotal.php", {id: id}, function(data) {                        
+            cambiarContenidos('ventas/list_sol_equipo.php', 'Solicitudes');
+        });
+    }
+}
+
+function facturarvd(idVenta, folio) {
+    var r = confirm('¿Realmente deseas generar la prefactura de la venta '+folio+'?');
+    if (r == true) {
+        loading("Cargando ...");
+        $('#mensajes').load("ventas/PrefacturaVD.php", {vd: idVenta}, function() {
+            finished();
+            //cambiarContenidos('ventas/list_sol_equipo.php', 'Solicitudes');            
+        });
+    }
+}
