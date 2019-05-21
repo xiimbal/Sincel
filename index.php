@@ -140,7 +140,7 @@
         <meta http-equiv="expires" content="-1">
         <!-- FIN DE LOS METATAGS PARA EL CORRECTO FUNCIONAMIENTO DEL CONTENIDO RESPONSIVE -->
         
-        <script src="../resources/js/jquery/jquery-1.11.3.min.js"></script>        
+        <script src="resources/js/jquery/jquery-1.11.3.min.js"></script>        
         <script src="resources/js/md5.js"></script>
         
         <link rel="shortcut icon" href="resources/images/logos/ra4.png" type="image/x-icon"/>
@@ -158,7 +158,7 @@
         <!-- ESTILOS PERSONALIZADOS DEL SITIO WEB -->
         <link href="resources/css/Bootstrap 4/css/login.css" rel="stylesheet" type="text/css">
         
-        <script language="javascript" type="text/javascript" src="/resources/js/countdown.js"></script>             <!-- PCM 30/01/2019 -->
+        <script language="javascript" type="text/javascript" src="resources/js/countdown.js"></script>             <!-- PCM 30/01/2019 -->
     </head>
 
     <!-- PCM 30/01/2019 -->
