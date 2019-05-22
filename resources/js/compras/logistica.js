@@ -1,6 +1,9 @@
 $(document).ready(function () {
     var tabla = $('#tabla_rutas').DataTable({
         "destroy": true,
+        "ajax": {
+            url: "listar"
+        },
         "languaje": espaniol
     });
 });
