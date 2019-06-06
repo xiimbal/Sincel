@@ -9,4 +9,15 @@ BEGIN
     ON c_estado.IDEstado = c_logistica.estatus
     WHERE c_logistica.estatus = 303 AND c_logistica.Activo = 1;
 END$$
-DELIMITER ;    
+DELIMITER ;
+
+
+-- CREACION DE PROCEDIMIENTO ALMACENADO QUE BUSCA POR CLAVE DE EMBARQUE "asignacion_chofer.php"
+DELIMITER $$
+DROP PROCEDURE IF EXISTS SELECT_CLAVES_VEHICULARES$$
+CREATE PROCEDURE SELECT_CLAVES_VEHICULARES(fecha_embarque date)
+BEGIN
+    SELECT * FROM c_logistica
+    WHERE c_logistica.estatus = 303 AND c_logistica.fecha = fecha_embarque GROUP BY c_logistica.CV;
+END$$
+DELIMITER ;

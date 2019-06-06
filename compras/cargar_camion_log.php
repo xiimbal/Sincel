@@ -9,11 +9,13 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <!-- FIN DE LA ADICIÓN DE METATAGS PARA WEB RESPONSIVE -->    
 
-    <title><?php echo $_SESSION['nombreEmpresa']; ?></title>      
+    <title><?php echo $_SESSION['nombreEmpresa']; ?></title>    
 
-    <!-- LINK HACIA BOOTSTRAP, ESTILOS DE LA SIDENAV E ICONOS FONTAWESOME -->
-    <link href="resources/css/Bootstrap 4/css/bootstrap.min.css" rel="stylesheet" type="text/css">
-    <link href="resources/css/Bootstrap 4/css/all.min.css" rel="stylesheet">
+    <script type="text/javascript" charset="utf8" src="resources/js/jquery-3.3.1.min.js"></script>
+    
+    <script type="text/javascript">
+        var jq = $.noConflict(true);
+    </script>
 
 </head>
 <body>
@@ -40,8 +42,6 @@
                         <th  class="text-center" scope="col">No. de Control Vehicular</th>
                         <th  class="text-center" scope="col">Suma de Piezas</th>                        
                         <th  class="text-center" scope="col">Piezas en camión</th>
-                        <th  class="text-center" scope="col">Piezas Entregadas</th>
-                        <th  class="text-center" scope="col">Status del pedido</th>
                         <th  class="text-center" scope="col">Cargar Camión</th>
 
                     </tr>
@@ -49,7 +49,7 @@
                 </thead>
                 <!-- FIN DE LAS CABECERAS DE LA TABLA -->
 
-                <tbody>                                     
+                <tbody class="text-center">                                     
                     
                 </tbody>
             </table>

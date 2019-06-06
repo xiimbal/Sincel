@@ -30,8 +30,8 @@ class Conexion {
         }
         $conexionMulti->Desconectar();        
 
-        $this->db = mysql_connect($MYSQL_HOST, $MYSQL_LOGIN, $MYSQL_PASS);
-        @mysql_query("SET NAMES 'utf8'", $this->db);
+        $this->db = mysql_connect($MYSQL_HOST, $MYSQL_LOGIN, $MYSQL_PASS);        
+        @mysql_query("SET NAMES 'UTF8'", $this->db);
         if (!$this->db) {
             echo('Error: Imposible conectar a la base de datos, verifique que el servidor funcione correctamente: ' . mysql_error());
             exit;

@@ -82,7 +82,10 @@
         <!-- LINK HACIA BOOTSTRAP, ESTILOS DE LA SIDENAV E ICONOS FONTAWESOME -->
         <link href="resources/css/Bootstrap 4/css/all.min.css" rel="stylesheet">
         <link href="resources/css/Bootstrap 4/css/bootstrap.min.css" rel="stylesheet" type="text/css">
-        <link href="resources/css/Bootstrap 4/css/BarraNavegacion.min.css" rel="stylesheet" type="text/css">
+        <link href="resources/css/Bootstrap 4/css/BarraNavegacion.min.css" rel="stylesheet" type="text/css">        
+
+        <!-- ADICION DE LIBRERÍA PARA CREAR ALERTS -->
+        <script type="text/javascript" charset="utf8" src="resources/js/sweetalert.min.js"></script>
 
     </head>
     
@@ -279,7 +282,7 @@
         <!-- FIN DE LA BARRA DE NAVEGACION SUPERIOR -->
                     
 
-        <div class="container-fluid">  
+        <div class="">  
 
             <div class="clear hideSkiplink">
                                 
@@ -303,7 +306,7 @@
 
                 <div id="mensajes" style="margin-left: 15px;"></div>                
 
-                <div id="contenidos" class="container-fluid"></div> 
+                <div id="contenidos" class=""></div> 
 
                 <div id="contenidos_invisibles" style="display: none;"></div>
 
